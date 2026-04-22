@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  Animated as RNAnimated, ScrollView,
+  Animated as RNAnimated, ScrollView, Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { VideoView, useVideoPlayer } from 'expo-video';
@@ -128,12 +128,29 @@ export default function ConfirmScreen({ theme, event, name, guests, onReset }: P
       {/* VÍDEO DE FUNDO */}
       {event.videoUri ? (
         <>
-          <VideoView
-            player={videoPlayer}
-            style={s.videoBg}
-            contentFit="cover"
-            nativeControls={false}
-          />
+          {Platform.OS === 'web' ? (
+            React.createElement('video', {
+              src: event.videoUri,
+              autoPlay: true,
+              loop: true,
+              muted: true,
+              playsInline: true,
+              style: {
+                position: 'absolute',
+                top: 0, left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              },
+            })
+          ) : (
+            <VideoView
+              player={videoPlayer}
+              style={s.videoBg}
+              contentFit="cover"
+              nativeControls={false}
+            />
+          )}
           <LinearGradient
             colors={[theme.bg + 'bb', theme.bg + 'ee', theme.bg] as any}
             locations={[0, 0.5, 1]}

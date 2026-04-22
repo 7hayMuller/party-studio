@@ -61,7 +61,13 @@ export default function Host() {
 
       setShareModal({ eventId, url });
     } catch (e: any) {
-      Alert.alert('Erro ao publicar', e?.message ?? 'Tente novamente.');
+      console.error('[publicar] erro:', e?.message, e);
+      const msg = e?.message ?? 'Tente novamente.';
+      if (Platform.OS === 'web') {
+        window.alert('Erro ao publicar: ' + msg);
+      } else {
+        Alert.alert('Erro ao publicar', msg);
+      }
     } finally {
       setPublishing(false);
     }
