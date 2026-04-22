@@ -151,7 +151,7 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
           opacity: frontOpac,
           ...(!isWeb && { transform: [{ perspective: 1400 }, { rotateY: frontRot }] as any }),
         }]}>
-          <View style={[s.card, { width: ticketW, height: ticketH, backgroundColor: cardBg }]}>
+          <View style={[s.card, { width: ticketW, height: ticketH, backgroundColor: cardBg, borderColor: theme.a1 + '55' }]}>
 
             {/* Faixa superior colorida */}
             <LinearGradient
@@ -212,7 +212,7 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
           opacity: backOpac,
           ...(!isWeb && { transform: [{ perspective: 1400 }, { rotateY: backRot }] as any }),
         }]}>
-          <View style={[s.card, { width: ticketW, height: ticketH, backgroundColor: cardBg }]}>
+          <View style={[s.card, { width: ticketW, height: ticketH, backgroundColor: cardBg, borderColor: theme.a1 + '55' }]}>
 
             {/* Faixa superior */}
             <LinearGradient

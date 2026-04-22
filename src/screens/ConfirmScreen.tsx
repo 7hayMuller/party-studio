@@ -22,8 +22,12 @@ const GRID_DELAY = 900;
 export default function ConfirmScreen({ theme, event, name, guests, onReset }: Props) {
   const videoPlayer = useVideoPlayer(
     event.videoUri ? { uri: event.videoUri } : null,
-    p => { p.loop = true; p.muted = true; p.play(); },
+    p => { p.loop = true; p.muted = true; },
   );
+
+  useEffect(() => {
+    if (event.videoUri) videoPlayer.play();
+  }, []);
 
   const iconScale  = useRef(new RNAnimated.Value(0)).current;
   const headerFade = useRef(new RNAnimated.Value(0)).current;

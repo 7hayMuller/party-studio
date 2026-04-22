@@ -60,8 +60,8 @@ export default function Host() {
       const url     = `${WEB_URL}/guest?id=${eventId}`;
 
       setShareModal({ eventId, url });
-    } catch (e) {
-      router.push('/guest');
+    } catch (e: any) {
+      Alert.alert('Erro ao publicar', e?.message ?? 'Tente novamente.');
     } finally {
       setPublishing(false);
     }
