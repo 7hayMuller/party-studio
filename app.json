@@ -1,29 +1,78 @@
 {
   "expo": {
-    "name": "rsvp-novo",
-    "slug": "rsvp-novo",
+    "name": "Party Studio",
+    "slug": "party-studio",
     "version": "1.0.0",
+    "scheme": "partystudio",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#04040e"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.partystudio.app",
+      "buildNumber": "1",
+      "associatedDomains": ["applinks:party-studio.vercel.app"],
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Necessário para reprodução de áudio nos convites.",
+        "NSPhotoLibraryUsageDescription": "Permite adicionar uma foto de capa ao seu convite.",
+        "NSCameraUsageDescription": "Permite tirar uma foto de capa para o seu convite."
+      }
     },
     "android": {
+      "package": "com.partystudio.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#04040e"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "party-studio.vercel.app",
+              "pathPrefix": "/guest"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-audio",
+      "expo-video",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite adicionar uma foto de capa ao seu convite.",
+          "cameraPermission": "Permite tirar uma foto de capa para o seu convite."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
     }
   }
 }
