@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -X POST http://localhost:3000/theme -H \"Content-Type: application/json\" -d '{\"prompt\":\"teste\"}')",
+      "Bash(npm install:*)",
+      "Bash(curl:*)",
+      "Bash(npx expo:*)",
+      "Bash(npx tsc *)",
+      "Bash(grep -E \"\\\\.\\(tsx?|json\\)$\")",
+      "Bash(npm uninstall *)",
+      "Bash(node -e ' *)",
+      "Bash(node *)",
+      "Bash(kill %1)",
+      "Bash(PORT=3001 node server.js)",
+      "Bash(PORT=3001 timeout 5 node server.js)",
+      "Bash(echo \"EXIT: $?\")"
+    ]
+  }
+}
