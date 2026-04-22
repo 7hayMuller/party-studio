@@ -18,7 +18,7 @@ const eventSchema = z.object({
     date: z.string().optional(),
     time: z.string().optional(),
     location: z.string().max(200).optional(),
-    hostEmail: z.union([z.string().email(), z.literal('')]).optional(),
+    hostEmail: z.string().email().optional().or(z.literal('')),
     dressCode: z.string().max(100).optional(),
     musicUri: z.string().optional().nullable(),
     videoUri: z.string().optional().nullable(),
