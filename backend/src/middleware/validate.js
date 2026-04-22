@@ -18,7 +18,7 @@ const eventSchema = z.object({
     date: z.string().optional(),
     time: z.string().optional(),
     location: z.string().max(200).optional(),
-    hostEmail: z.string().email().optional().or(z.literal('')),
+    hostEmail: z.union([z.string().email(), z.literal('')]).optional(),
     dressCode: z.string().max(100).optional(),
     musicUri: z.string().optional().nullable(),
     videoUri: z.string().optional().nullable(),
@@ -36,7 +36,8 @@ function validate(schema) {
   return (req, res, next) => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
-      return res.status(400).json({ error: result.error.errors[0].message });
+      const issues = result.error.issues ?? result.error.errors ?? [];
+      return res.status(400).json({ error: issues[0]?.message ?? 'Dados inválidos' });
     }
     req.body = result.data;
     next();
