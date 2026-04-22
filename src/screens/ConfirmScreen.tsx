@@ -15,11 +15,12 @@ interface Props {
   name: string;
   guests: number;
   onReset: () => void;
+  showReset?: boolean;
 }
 
 const GRID_DELAY = 900;
 
-export default function ConfirmScreen({ theme, event, name, guests, onReset }: Props) {
+export default function ConfirmScreen({ theme, event, name, guests, onReset, showReset = true }: Props) {
   const videoPlayer = useVideoPlayer(
     event.videoUri ? { uri: event.videoUri } : null,
     p => { p.loop = true; p.muted = true; },
@@ -201,9 +202,11 @@ export default function ConfirmScreen({ theme, event, name, guests, onReset }: P
               </Text>
             </TouchableOpacity>
           ) : null}
-          <TouchableOpacity style={s.resetBtn} onPress={onReset}>
-            <Text style={s.resetTxt}>↺ NOVO CONVIDADO</Text>
-          </TouchableOpacity>
+          {showReset && (
+            <TouchableOpacity style={s.resetBtn} onPress={onReset}>
+              <Text style={s.resetTxt}>↺ NOVO CONVIDADO</Text>
+            </TouchableOpacity>
+          )}
           <FooterBrand />
         </RNAnimated.View>
 

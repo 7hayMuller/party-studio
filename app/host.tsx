@@ -7,6 +7,7 @@ import IntroScreen from '../src/screens/IntroScreen';
 import FormScreen from '../src/screens/FormScreen';
 import ConfirmScreen from '../src/screens/ConfirmScreen';
 import LoginScreen from '../src/screens/LoginScreen';
+import HostMenu from '../src/screens/HostMenu';
 import { useTheme } from '../src/hooks/useTheme';
 import { EVENT_CONFIG, EventConfig } from '../src/config/theme';
 import { ThemeInput, publishEvent } from '../src/services/ai';
@@ -31,6 +32,7 @@ export default function Host() {
   const [guests, setGuests]     = useState(0);
   const [publishing, setPublishing] = useState(false);
   const [shareModal, setShareModal] = useState<{ eventId: string; url: string } | null>(null);
+  const [menuOpen, setMenuOpen]     = useState(false);
 
   const handleGenerate = async (input: ThemeInput, ev: EventConfig) => {
     setLastInput({ input, ev });
@@ -105,8 +107,8 @@ export default function Host() {
       {screen === 'editing' && (
         <>
           <HostPanel onGenerate={handleGenerate} loading={loading} source={source} theme={theme} />
-          <TouchableOpacity style={s.logoutBtn} onPress={handleSignOut}>
-            <Text style={s.logoutTxt}>Sair</Text>
+          <TouchableOpacity style={s.menuBtn} onPress={() => setMenuOpen(true)}>
+            <Text style={s.menuIco}>≡</Text>
           </TouchableOpacity>
         </>
       )}
@@ -160,6 +162,12 @@ export default function Host() {
           onReset={() => { setName(''); setGuests(0); setScreen('editing'); }}
         />
       )}
+
+      <HostMenu
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onSignOut={() => { setMenuOpen(false); handleSignOut(); }}
+      />
 
       {/* Modal de compartilhamento pós-publicação */}
       <Modal visible={!!shareModal} transparent animationType="fade">
@@ -271,16 +279,18 @@ const s = StyleSheet.create({
   guestBtn:    { paddingVertical: 12 },
   guestBtnTxt: { fontSize: 12, color: 'rgba(255,255,255,0.35)', letterSpacing: 1 },
 
-  logoutBtn: {
+  menuBtn: {
     position: 'absolute',
     top: 52,
     right: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    width: 36,
+    height: 36,
     backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  logoutTxt: { fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1 },
+  menuIco: { fontSize: 18, color: 'rgba(255,255,255,0.5)', lineHeight: 20 },
 });

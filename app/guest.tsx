@@ -84,12 +84,10 @@ export default function Guest() {
           name={name}
           guests={guests}
           onReset={() => setScreen('form')}
+          showReset={false}
         />
       )}
 
-      <TouchableOpacity style={s.hostBtn} onPress={() => router.push('/host')}>
-        <Text style={s.hostTxt}>✦</Text>
-      </TouchableOpacity>
     </View>
   );
 }

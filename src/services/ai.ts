@@ -152,6 +152,24 @@ export async function publishEvent(theme: AppTheme, event: object, token?: strin
   return eventId as string;
 }
 
+export async function fetchMyEvents(token: string): Promise<{ id: string; event: any; created_at: string }[]> {
+  const res = await fetch(`${API_URL}/events`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Falha ao buscar eventos');
+  const { events } = await res.json();
+  return events;
+}
+
+export async function fetchEventRsvps(eventId: string, token: string): Promise<any[]> {
+  const res = await fetch(`${API_URL}/events/${eventId}/rsvps`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Falha ao buscar RSVPs');
+  const { rsvps } = await res.json();
+  return rsvps;
+}
+
 export async function loadEvent(eventId: string): Promise<{ theme: AppTheme; event: object }> {
   const res = await fetch(`${API_URL}/events/${eventId}`);
   if (!res.ok) throw new Error('Evento não encontrado');

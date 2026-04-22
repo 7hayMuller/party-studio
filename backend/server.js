@@ -187,6 +187,20 @@ app.post('/events', requireAuth, createEventLimiter, validate(eventSchema), asyn
   res.json({ eventId: id });
 });
 
+app.get('/events', requireAuth, async (req, res) => {
+  const { data, error } = await supabase
+    .from('events')
+    .select('id, event, created_at')
+    .eq('host_id', req.user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('[GET /events] erro supabase:', error.message);
+    return res.status(500).json({ error: 'Falha ao buscar eventos' });
+  }
+  res.json({ events: data });
+});
+
 app.get('/events/:id', async (req, res) => {
   const { data, error } = await supabase
     .from('events')
