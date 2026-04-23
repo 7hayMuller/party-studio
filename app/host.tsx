@@ -104,14 +104,12 @@ export default function Host() {
 
   return (
     <View style={s.root}>
-      {screen === 'editing' && (
-        <>
-          <HostPanel onGenerate={handleGenerate} loading={loading} source={source} theme={theme} />
-          <TouchableOpacity style={s.menuBtn} onPress={() => setMenuOpen(true)}>
-            <Text style={s.menuIco}>≡</Text>
-          </TouchableOpacity>
-        </>
-      )}
+      <View style={screen === 'editing' ? { flex: 1 } : { display: 'none' }}>
+        <HostPanel onGenerate={handleGenerate} loading={loading} source={source} theme={theme} />
+        <TouchableOpacity style={s.menuBtn} onPress={() => setMenuOpen(true)}>
+          <Text style={s.menuIco}>≡</Text>
+        </TouchableOpacity>
+      </View>
 
       {screen === 'preview' && (
         <View style={{ flex: 1 }}>
@@ -169,7 +167,7 @@ export default function Host() {
             <View style={s.previewActions}>
               <TouchableOpacity
                 style={[s.previewBtn, s.regenBtn]}
-                onPress={() => setScreen('preview')}
+                onPress={() => setScreen('editing')}
               >
                 <Text style={s.regenTxt}>← EDITAR</Text>
               </TouchableOpacity>
