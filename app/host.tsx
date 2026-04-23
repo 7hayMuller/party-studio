@@ -319,7 +319,7 @@ const s = StyleSheet.create({
 
   menuBtn: {
     position: 'absolute',
-    top: 30,
+    top: 40,
     right: 16,
     width: 36,
     height: 36,
