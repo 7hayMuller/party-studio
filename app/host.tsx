@@ -19,11 +19,15 @@ type Screen = 'editing' | 'preview' | 'intro' | 'form' | 'confirm';
 const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL || 'https://party-studio.vercel.app';
 
 export default function Host() {
-  const router = useRouter();
   const { session, loading: authLoading } = useAuth();
 
   if (authLoading) return null;
   if (!session) return <LoginScreen />;
+  return <HostContent />;
+}
+
+function HostContent() {
+  const router = useRouter();
   const { theme, loading, source, generate } = useTheme();
   const [event, setEvent]       = useState<EventConfig>(EVENT_CONFIG);
   const [screen, setScreen]     = useState<Screen>('editing');
