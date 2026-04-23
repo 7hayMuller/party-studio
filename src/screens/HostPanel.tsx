@@ -461,9 +461,9 @@ const s = StyleSheet.create({
   // Step indicator
   stepRow:       { flexDirection: 'row', alignItems: 'center', marginBottom: 20, marginTop:20 },
   stepDot:       { width: 28, height: 28, borderRadius: 14, backgroundColor: '#141414', borderWidth: 1, borderColor: '#2a2a2a', alignItems: 'center', justifyContent: 'center' },
-  stepDotActive: { backgroundColor: '#1e1e1e', borderColor: '#fff' },
+  stepDotActive: { backgroundColor: '#1e1e1e', borderColor: '#FF4FA3' },
   stepNum:       { fontSize: 11, color: '#555', fontWeight: '700' },
-  stepNumActive: { color: '#fff' },
+  stepNumActive: { color: '#FF4FA3' },
   stepLine:      { flex: 1, height: 1, backgroundColor: '#1e1e1e', marginHorizontal: 4 },
   stepLineActive: { backgroundColor: '#FF4FA3' },
   stepLabel:     { fontSize: 16, letterSpacing: 2, color: '#555', marginBottom: 24 },
