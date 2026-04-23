@@ -29,12 +29,12 @@ export async function generateTheme(input: ThemeInput): Promise<AppTheme> {
     body: JSON.stringify({
       tipo:             input.tipo,
       vibes:            input.vibes,
-      a1:               input.a1,
-      a2:               input.a2,
-      bg:               input.bg,
-      partyTitle:       input.partyTitle,
-      description:      input.description,
-      imageDescription: input.imageDescription,
+      a1:               input.a1  || undefined,
+      a2:               input.a2  || undefined,
+      bg:               input.bg  || undefined,
+      partyTitle:       input.partyTitle  || undefined,
+      description:      input.description || undefined,
+      imageDescription: input.imageDescription || undefined,
     }),
   });
 
