@@ -41,9 +41,10 @@ export async function signInWithEmail(email: string, password: string): Promise<
   if (error) throw error;
 }
 
-export async function signUpWithEmail(email: string, password: string): Promise<void> {
-  const { error } = await supabase.auth.signUp({ email, password });
+export async function signUpWithEmail(email: string, password: string): Promise<{ needsConfirmation: boolean }> {
+  const { data, error } = await supabase.auth.signUp({ email, password });
   if (error) throw error;
+  return { needsConfirmation: !data.session };
 }
 
 export async function signOut(): Promise<void> {

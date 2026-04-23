@@ -33,8 +33,11 @@ export default function LoginScreen() {
       if (tab === 'login') {
         await signInWithEmail(email.trim(), password);
       } else {
-        await signUpWithEmail(email.trim(), password);
-        Alert.alert('Conta criada!', 'Verifique seu email para confirmar o cadastro.');
+        const { needsConfirmation } = await signUpWithEmail(email.trim(), password);
+        if (needsConfirmation) {
+          Alert.alert('Conta criada!', 'Verifique seu email para confirmar o cadastro antes de entrar.');
+        }
+        // se needsConfirmation = false, o onAuthStateChange já atualiza a sessão automaticamente
       }
     } catch (e: any) {
       Alert.alert('Erro', e.message ?? 'Falha na autenticação');
