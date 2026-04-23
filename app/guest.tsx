@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import IntroScreen from '../src/screens/IntroScreen';
 import FormScreen from '../src/screens/FormScreen';
 import ConfirmScreen from '../src/screens/ConfirmScreen';
+import YouTubePlayer from '../src/components/YouTubePlayer';
 import { BASE_THEME, EVENT_CONFIG, AppTheme, EventConfig } from '../src/config/theme';
 import { loadEvent, submitRsvp } from '../src/services/ai';
+import { useBackgroundAudio } from '../src/hooks/useBackgroundAudio';
 
 type S = 'loading' | 'intro' | 'form' | 'confirm' | 'error';
 
 export default function Guest() {
-  const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
 
   const [screen, setScreen]   = useState<S>('loading');
@@ -20,6 +21,9 @@ export default function Guest() {
   const [eventId, setEventId] = useState<string | null>(null);
   const [name, setName]       = useState('');
   const [guests, setGuests]   = useState(0);
+
+  const active = screen !== 'loading' && screen !== 'error';
+  const { playing: musicPlaying } = useBackgroundAudio(active ? (event.musicUri ?? '') : '');
 
   useEffect(() => {
     (async () => {
@@ -81,8 +85,11 @@ export default function Guest() {
 
   return (
     <View style={s.root}>
+      {/* YouTubePlayer persiste em todas as telas */}
+      {active && <YouTubePlayer videoId={event.youtubeVideoId || ''} />}
+
       {screen === 'intro' && (
-        <IntroScreen theme={theme} event={event} onNext={() => setScreen('form')} />
+        <IntroScreen theme={theme} event={event} onNext={() => setScreen('form')} musicPlaying={musicPlaying || !!event.youtubeVideoId} />
       )}
       {screen === 'form' && (
         <FormScreen theme={theme} event={event} onConfirm={handleConfirm} />
@@ -97,7 +104,6 @@ export default function Guest() {
           showReset={false}
         />
       )}
-
     </View>
   );
 }

@@ -4,12 +4,10 @@ import {
   Animated as RNAnimated, Image, ActivityIndicator, StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAudioPlayer, setAudioModeAsync } from 'expo-audio';
-import YouTubePlayer from '../components/YouTubePlayer';
 import FooterBrand from '../components/FooterBrand';
 import { AppTheme, EventConfig } from '../config/theme';
 
-interface Props { theme: AppTheme; event: EventConfig; onNext: () => void; }
+interface Props { theme: AppTheme; event: EventConfig; onNext: () => void; musicPlaying?: boolean; }
 
 // Renders a title with each character fading+sliding in with stagger
 function AnimatedTitle({ text, color }: { text: string; color: string }) {
@@ -78,14 +76,12 @@ function MusicBar({ color }: { color: string }) {
   );
 }
 
-export default function IntroScreen({ theme, event, onNext }: Props) {
+export default function IntroScreen({ theme, event, onNext, musicPlaying }: Props) {
   const fade    = useRef(new RNAnimated.Value(0)).current;
   const slideUp = useRef(new RNAnimated.Value(30)).current;
   const glow    = useRef(new RNAnimated.Value(0.6)).current;
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError]   = useState(false);
-  const [musicPlaying, setMusicPlaying] = useState(false);
-  const player = useAudioPlayer(event.musicUri ? { uri: event.musicUri } : undefined);
 
   useEffect(() => {
     RNAnimated.parallel([
@@ -97,22 +93,6 @@ export default function IntroScreen({ theme, event, onNext }: Props) {
       RNAnimated.timing(glow, { toValue: 1,   duration: 2500, useNativeDriver: true }),
       RNAnimated.timing(glow, { toValue: 0.4, duration: 2500, useNativeDriver: true }),
     ])).start();
-
-    if (event.musicUri) {
-      setAudioModeAsync({ playsInSilentMode: true })
-        .then(() => {
-          player.loop = true;
-          player.volume = 0.75;
-          player.play();
-          setMusicPlaying(true);
-        })
-        .catch(() => {});
-    }
-    if (event.youtubeVideoId) setMusicPlaying(true);
-
-    return () => {
-      if (event.musicUri) player.pause();
-    };
   }, []);
 
   const displayTitle = theme.partyTitle || `${theme.titleMain} ${theme.titleEm}`;
@@ -152,8 +132,6 @@ export default function IntroScreen({ theme, event, onNext }: Props) {
         locations={[0, 0.4, 1]}
         style={StyleSheet.absoluteFill}
       />
-
-      <YouTubePlayer videoId={event.youtubeVideoId || ''} />
 
       {/* INDICADOR DE MÚSICA */}
       {musicPlaying && (

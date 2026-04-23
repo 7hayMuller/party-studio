@@ -27,6 +27,8 @@ import { uploadMediaFile } from "../src/services/storage";
 import { HostPanelInitialValues } from "../src/screens/HostPanel";
 import { useAuth } from "../src/context/AuthContext";
 import { getAccessToken, signOut } from "../src/services/auth";
+import { useBackgroundAudio } from "../src/hooks/useBackgroundAudio";
+import YouTubePlayer from "../src/components/YouTubePlayer";
 
 const FREE_REGENS = 2;
 
@@ -68,6 +70,10 @@ function HostContent() {
   // Contador de regenerações e paywall
   const [regenCount, setRegenCount]     = useState(0);
   const [paywallVisible, setPaywallVisible] = useState(false);
+
+  // Áudio persiste durante preview e simulação
+  const simulating = screen === 'preview' || screen === 'intro' || screen === 'form' || screen === 'confirm';
+  const { playing: musicPlaying } = useBackgroundAudio(simulating ? ((event as any).musicUri ?? '') : '');
 
   const handleGenerate = async (input: ThemeInput, ev: EventConfig) => {
     if (!editingEventId) setRegenCount(0);
@@ -197,6 +203,7 @@ function HostContent() {
     <View style={s.root}>
       <View style={screen === "editing" ? { flex: 1 } : { display: "none" }}>
         <HostPanel
+          key={editingEventId ?? "new"}
           onGenerate={handleGenerate}
           loading={loading}
           source={source}
@@ -215,6 +222,7 @@ function HostContent() {
             theme={theme}
             event={event}
             onNext={() => setScreen("intro")}
+            musicPlaying={musicPlaying || !!event.youtubeVideoId}
           />
 
           <View style={s.previewBar}>
@@ -255,11 +263,15 @@ function HostContent() {
 
       {(screen === "intro" || screen === "form" || screen === "confirm") && (
         <>
+          {/* YouTubePlayer persiste durante a simulação */}
+          <YouTubePlayer videoId={event.youtubeVideoId || ''} />
+
           {screen === "intro" && (
             <IntroScreen
               theme={theme}
               event={event}
               onNext={() => setScreen("form")}
+              musicPlaying={musicPlaying || !!event.youtubeVideoId}
             />
           )}
           {screen === "form" && (
