@@ -265,7 +265,7 @@ function HostContent() {
           <Pressable style={s.modal} onPress={(e) => e.stopPropagation()}>
             <View style={s.logoWrap}>
               <Image
-                source={require("../../assets/check.png")}
+                source={require("../assets/check.png")}
                 style={s.logoImg}
                 resizeMode="contain"
               />
