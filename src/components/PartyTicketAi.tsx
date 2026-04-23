@@ -110,8 +110,8 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
       <Animated.View
         style={{
           position: 'absolute',
-          width: ticketW + 24,
-          height: ticketH + 24,
+          width: ticketW,
+          height: ticketH,
           borderRadius: 22,
           opacity: glow,
           shadowColor: theme.a1,

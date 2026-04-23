@@ -67,6 +67,7 @@ export default function HostPanel({ onGenerate, loading, source }: Props) {
   const [location, setLocation] = useState('');
   const [email, setEmail]       = useState('');
   const [dressCode, setDressCode] = useState('');
+  const [dressCodeImage, setDressCodeImage] = useState<string | null>(null);
   const [musicUri, setMusicUri]         = useState('');
   const [videoUri, setVideoUri]         = useState('');
   const [musicTab, setMusicTab]         = useState<'file' | 'youtube'>('file');
@@ -130,6 +131,17 @@ export default function HostPanel({ onGenerate, loading, source }: Props) {
     if (!result.canceled) setImageFile(result.assets[0].uri);
   };
 
+  const pickDressCodeImage = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) { Alert.alert('Permissão necessária', 'Precisa de acesso à galeria.'); return; }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 0.85,
+    });
+    if (!result.canceled) setDressCodeImage(result.assets[0].uri);
+  };
+
   const goNext = () => {
     if (step === 1 && !tipo) { Alert.alert('Selecione o tipo da festa'); return; }
     if (step < 3) { setStep(s => s + 1); return; }
@@ -190,8 +202,8 @@ export default function HostPanel({ onGenerate, loading, source }: Props) {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={s.logo}>✦ PARTY STUDIO</Text>
-          <Text style={s.title}>Painel do host</Text>
+          <Text style={s.logo}>✦ PARTY STUDIO ✦</Text>
+          <Text style={s.title}>Personalize seu convite</Text>
 
           {/* STEP INDICATOR */}
           <View style={s.stepRow}>
@@ -206,7 +218,7 @@ export default function HostPanel({ onGenerate, loading, source }: Props) {
           </View>
           <Text style={s.stepLabel}>
             {step === 1 && 'Tipo e estilo'}
-            {step === 2 && 'Cores e imagem'}
+            {step === 2 && 'Palheta e mídia'}
             {step === 3 && 'Dados do evento'}
           </Text>
 
@@ -261,8 +273,7 @@ export default function HostPanel({ onGenerate, loading, source }: Props) {
 
           {/* STEP 2 */}
           {step === 2 && (
-            <>
-              <Text style={s.lbl}>CORES</Text>
+            <>              
               <ColorPicker
                 label="COR PRINCIPAL (bordas, botões)"
                 value={a1} aiMode={aiA1}
@@ -355,23 +366,6 @@ export default function HostPanel({ onGenerate, loading, source }: Props) {
                   }
                 </>
               )}
-            </>
-          )}
-
-          {/* STEP 3 */}
-          {step === 3 && (
-            <>
-              <Text style={s.lbl}>DADOS DO EVENTO</Text>
-              <TextInput style={s.inp} placeholder="Nome da festa" placeholderTextColor="#444" value={name} onChangeText={setName} />
-              <View style={s.row}>
-                <TextInput style={[s.inp, { flex: 1 }]} placeholder="Data (ex: 15 AGO)" placeholderTextColor="#444" value={date} onChangeText={setDate} />
-                <View style={{ width: 8 }} />
-                <TextInput style={[s.inp, { flex: 1 }]} placeholder="Horário" placeholderTextColor="#444" value={time} onChangeText={setTime} />
-              </View>
-              <TextInput style={s.inp} placeholder="Local" placeholderTextColor="#444" value={location} onChangeText={setLocation} />
-              <TextInput style={s.inp} placeholder="Seu email" placeholderTextColor="#444" value={email} onChangeText={setEmail} keyboardType="email-address" />
-              <TextInput style={s.inp} placeholder="Dress Code" placeholderTextColor="#444" value={dressCode} onChangeText={setDressCode} />
-
               <Text style={[s.lbl, { marginTop: 16 }]}>VÍDEO DA TELA DE CONFIRMAÇÃO</Text>
               <View style={s.uploadRow}>
                 <TouchableOpacity style={s.uploadBtn} onPress={pickVideo}>
@@ -387,6 +381,38 @@ export default function HostPanel({ onGenerate, loading, source }: Props) {
                 <Text style={s.mediaName} numberOfLines={1}>▶ {videoUri.split('/').pop()}</Text>
               ) : (
                 <Text style={s.mediaSub}>Opcional — aparece como fundo quando o convidado confirmar presença</Text>
+              )}
+            </>
+          )}
+
+          {/* STEP 3 */}
+          {step === 3 && (
+            <>              
+              <TextInput style={s.inp} placeholder="Nome do evento" placeholderTextColor="#444" value={name} onChangeText={setName} />
+              <View style={s.row}>
+                <TextInput style={[s.inp, { flex: 1 }]} placeholder="Data (ex: 15 AGOSTO)" placeholderTextColor="#444" value={date} onChangeText={setDate} />
+                <View style={{ width: 8 }} />
+                <TextInput style={[s.inp, { flex: 1 }]} placeholder="Horário" placeholderTextColor="#444" value={time} onChangeText={setTime} />
+              </View>
+              <TextInput style={s.inp} placeholder="Local do evento" placeholderTextColor="#444" value={location} onChangeText={setLocation} />
+              <TextInput style={s.inp} placeholder="E-mail para receber as confirmações" placeholderTextColor="#444" value={email} onChangeText={setEmail} keyboardType="email-address" />
+              <TextInput style={s.inp} placeholder="Dress Code" placeholderTextColor="#444" value={dressCode} onChangeText={setDressCode} />
+
+              <Text style={[s.lbl, { marginTop: 8 }]}>IMAGEM MODELO DE DRESS CODE</Text>
+              <View style={s.uploadRow}>
+                <TouchableOpacity style={s.uploadBtn} onPress={pickDressCodeImage}>
+                  <Text style={s.uploadTxt}>{dressCodeImage ? '🔄 TROCAR IMAGEM' : '👗 ESCOLHER IMAGEM'}</Text>
+                </TouchableOpacity>
+                {dressCodeImage && (
+                  <TouchableOpacity style={s.removeBtn} onPress={() => setDressCodeImage(null)}>
+                    <Text style={s.removeTxt}>✕</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              {dressCodeImage ? (
+                <Image source={{ uri: dressCodeImage }} style={s.preview} resizeMode="cover" />
+              ) : (
+                <Text style={s.mediaSub}>Opcional — exemplo visual do look esperado</Text>
               )}
 
               {source && (
@@ -433,14 +459,14 @@ const s = StyleSheet.create({
   title:         { fontSize: 24, fontWeight: '700', color: '#fff', marginBottom: 20 },
 
   // Step indicator
-  stepRow:       { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
+  stepRow:       { flexDirection: 'row', alignItems: 'center', marginBottom: 20, marginTop:20 },
   stepDot:       { width: 28, height: 28, borderRadius: 14, backgroundColor: '#141414', borderWidth: 1, borderColor: '#2a2a2a', alignItems: 'center', justifyContent: 'center' },
   stepDotActive: { backgroundColor: '#1e1e1e', borderColor: '#fff' },
   stepNum:       { fontSize: 11, color: '#555', fontWeight: '700' },
   stepNumActive: { color: '#fff' },
   stepLine:      { flex: 1, height: 1, backgroundColor: '#1e1e1e', marginHorizontal: 4 },
   stepLineActive: { backgroundColor: '#fff' },
-  stepLabel:     { fontSize: 10, letterSpacing: 2, color: '#555', marginBottom: 24 },
+  stepLabel:     { fontSize: 16, letterSpacing: 2, color: '#555', marginBottom: 24 },
 
   lbl:           { fontSize: 9, letterSpacing: 2, color: '#555', marginBottom: 10 },
   chips:         { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

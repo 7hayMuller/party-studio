@@ -319,7 +319,7 @@ const s = StyleSheet.create({
 
   menuBtn: {
     position: 'absolute',
-    top: 52,
+    top: 30,
     right: 16,
     width: 36,
     height: 36,
@@ -330,5 +330,5 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  menuIco: { fontSize: 18, color: 'rgba(255,255,255,0.5)', lineHeight: 20 },
+  menuIco: { fontSize: 18, color: 'rgba(255,255,255,0.5)', lineHeight: 20, },
 });

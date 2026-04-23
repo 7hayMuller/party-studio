@@ -202,11 +202,11 @@ export default function ConfirmScreen({ theme, event, name, guests, onReset, sho
               </Text>
             </TouchableOpacity>
           ) : null}
-          {showReset && (
+          {/* {showReset && (
             <TouchableOpacity style={s.resetBtn} onPress={onReset}>
               <Text style={s.resetTxt}>↺ NOVO CONVIDADO</Text>
             </TouchableOpacity>
-          )}
+          )} */}
           <FooterBrand />
         </RNAnimated.View>
 

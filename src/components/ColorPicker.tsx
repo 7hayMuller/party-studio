@@ -28,7 +28,7 @@ export default function ColorPicker({ label, value, aiMode, onChangeColor, onTog
           onPress={() => onToggleAi(!aiMode)}
         >
           <Text style={[s.aiTxt, aiMode && s.aiTxtActive]}>
-            {aiMode ? '✦ IA escolheu' : '✦ IA escolher'}
+            {aiMode ? '✦ IA escolheu' : '✦ Deixar com a IA'}
           </Text>
         </TouchableOpacity>
       </View>
