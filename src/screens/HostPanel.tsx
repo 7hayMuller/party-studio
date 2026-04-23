@@ -465,7 +465,7 @@ const s = StyleSheet.create({
   stepNum:       { fontSize: 11, color: '#555', fontWeight: '700' },
   stepNumActive: { color: '#fff' },
   stepLine:      { flex: 1, height: 1, backgroundColor: '#1e1e1e', marginHorizontal: 4 },
-  stepLineActive: { backgroundColor: '#fff' },
+  stepLineActive: { backgroundColor: '#FF4FA3' },
   stepLabel:     { fontSize: 16, letterSpacing: 2, color: '#555', marginBottom: 24 },
 
   lbl:           { fontSize: 9, letterSpacing: 2, color: '#555', marginBottom: 10 },
