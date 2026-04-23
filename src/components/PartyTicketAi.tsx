@@ -180,7 +180,7 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
               />
 
               {/* Descrição em CAPS */}
-              <Text style={[s.frontDesc, { color: theme.a2 }]} numberOfLines={4}>
+              <Text style={[s.frontDesc, { color: theme.a1 }]} numberOfLines={4}>
                 {displayDesc}
               </Text>
 
@@ -199,7 +199,7 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
               </View>
               <View style={{ alignItems: 'flex-end' }}>
                 <Text style={s.stubLabel}>TICKET</Text>
-                <Text style={[s.stubVal, { color: theme.a2 }]}>{ticketCode}</Text>
+                <Text style={[s.stubVal, { color: theme.a1 }]}>{ticketCode}</Text>
               </View>
             </View>
           </View>
@@ -227,7 +227,7 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
               {/* Cabeçalho */}
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 }}>              
                 <View style={{ flex: 1 }}>
-                  <Text style={[s.eyebrow, { color: theme.a1 + 'cc', marginBottom: 2 }]}>{theme.eyebrow}</Text>
+                  <Text style={[s.eyebrow, { color: theme.a2 + 'cc', marginBottom: 2 }]}>{theme.eyebrow}</Text>
                   <Text style={[s.backTitle, { color: '#fff' }]} numberOfLines={2}>{displayTitle}</Text>
                 </View>
                 <Text style={[s.passTag, { color: theme.a2, borderColor: theme.a2 + '55' }]}>CONVITE</Text>
@@ -235,7 +235,7 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
 
               {/* Linha */}
               <LinearGradient
-                colors={['transparent', theme.a1 + '55', 'transparent'] as any}
+                colors={['transparent', theme.a2 + '55', 'transparent'] as any}
                 start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
                 style={{ height: 1, marginBottom: 20 }}
               />
