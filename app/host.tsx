@@ -22,9 +22,13 @@ import LoginScreen from "../src/screens/LoginScreen";
 import HostMenu from "../src/screens/HostMenu";
 import { useTheme } from "../src/hooks/useTheme";
 import { EVENT_CONFIG, EventConfig } from "../src/config/theme";
-import { ThemeInput, publishEvent } from "../src/services/ai";
+import { ThemeInput, publishEvent, updateEvent, loadEvent } from "../src/services/ai";
+import { uploadMediaFile } from "../src/services/storage";
+import { HostPanelInitialValues } from "../src/screens/HostPanel";
 import { useAuth } from "../src/context/AuthContext";
 import { getAccessToken, signOut } from "../src/services/auth";
+
+const FREE_REGENS = 2;
 
 type Screen = "editing" | "preview" | "intro" | "form" | "confirm";
 
@@ -57,7 +61,16 @@ function HostContent() {
   } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Edição de convite existente
+  const [editingEventId, setEditingEventId]       = useState<string | null>(null);
+  const [panelInitialValues, setPanelInitialValues] = useState<HostPanelInitialValues | undefined>();
+
+  // Contador de regenerações e paywall
+  const [regenCount, setRegenCount]     = useState(0);
+  const [paywallVisible, setPaywallVisible] = useState(false);
+
   const handleGenerate = async (input: ThemeInput, ev: EventConfig) => {
+    if (!editingEventId) setRegenCount(0);
     setLastInput({ input, ev });
     setEvent(ev);
     await generate(input);
@@ -66,24 +79,72 @@ function HostContent() {
 
   const handleRegenerate = async () => {
     if (!lastInput) return;
+    if (regenCount >= FREE_REGENS) {
+      setPaywallVisible(true);
+      return;
+    }
+    setRegenCount(c => c + 1);
     setScreen("editing");
     setEvent(lastInput.ev);
     await generate(lastInput.input);
     setScreen("preview");
   };
 
+  const handleEditEvent = async (ev: any) => {
+    try {
+      const data = await loadEvent(ev.id);
+      const t = data.theme as any;
+      const e = data.event as any;
+      setPanelInitialValues({
+        a1: t?.a1, a2: t?.a2, bg: t?.bg,
+        partyTitle: t?.partyTitle, description: t?.description,
+        name: e?.name, date: e?.date, time: e?.time,
+        location: e?.location, email: e?.hostEmail,
+        dressCode: e?.dressCode, musicUri: e?.musicUri,
+        videoUri: e?.videoUri, youtubeVideoId: e?.youtubeVideoId,
+      });
+      setEditingEventId(ev.id);
+      setRegenCount(0);
+      setScreen("editing");
+    } catch {
+      Alert.alert("Erro", "Não foi possível carregar o convite para edição.");
+    }
+  };
+
   const handlePublish = async () => {
     setPublishing(true);
     try {
+      let publishTheme = { ...theme };
+      let publishEv    = { ...event } as typeof event & { musicUri: string; videoUri: string };
+
+      if ((event as any).musicUri) {
+        (publishEv as any).musicUri = await uploadMediaFile((event as any).musicUri, 'music');
+      }
+      if ((event as any).videoUri) {
+        (publishEv as any).videoUri = await uploadMediaFile((event as any).videoUri, 'video');
+      }
+      if (theme.imageUrl && !theme.imageUrl.startsWith('http')) {
+        publishTheme = { ...publishTheme, imageUrl: await uploadMediaFile(theme.imageUrl, 'image') };
+      }
+
       await AsyncStorage.multiSet([
-        ["rsvp_theme", JSON.stringify(theme)],
-        ["rsvp_event", JSON.stringify(event)],
+        ["rsvp_theme", JSON.stringify(publishTheme)],
+        ["rsvp_event", JSON.stringify(publishEv)],
       ]);
 
       const token = await getAccessToken();
-      const eventId = await publishEvent(theme, event, token ?? undefined);
-      const url = `${WEB_URL}/guest?id=${eventId}`;
+      let eventId: string;
 
+      if (editingEventId) {
+        await updateEvent(editingEventId, publishTheme, publishEv, token!);
+        eventId = editingEventId;
+        setEditingEventId(null);
+        setPanelInitialValues(undefined);
+      } else {
+        eventId = await publishEvent(publishTheme, publishEv, token ?? undefined);
+      }
+
+      const url = `${WEB_URL}/guest?id=${eventId}`;
       setShareModal({ eventId, url });
     } catch (e: any) {
       console.error("[publicar] erro:", e?.message, e);
@@ -140,6 +201,8 @@ function HostContent() {
           loading={loading}
           source={source}
           theme={theme}
+          initialValues={panelInitialValues}
+          isEditing={!!editingEventId}
         />
         <TouchableOpacity style={s.menuBtn} onPress={() => setMenuOpen(true)}>
           <Text style={s.menuIco}>≡</Text>
@@ -165,7 +228,7 @@ function HostContent() {
                 disabled={loading}
               >
                 <Text style={s.regenTxt}>
-                  {loading ? "..." : "↺ REGENERAR"}
+                  {loading ? "..." : regenCount >= FREE_REGENS ? "↺ REGENERAR 🔒" : `↺ REGENERAR (${FREE_REGENS - regenCount} restante${FREE_REGENS - regenCount !== 1 ? 's' : ''})`}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -251,7 +314,28 @@ function HostContent() {
           setMenuOpen(false);
           handleSignOut();
         }}
+        onEdit={handleEditEvent}
       />
+
+      {/* Modal de paywall — regenerações esgotadas */}
+      <Modal visible={paywallVisible} transparent animationType="fade">
+        <Pressable style={s.overlay} onPress={() => setPaywallVisible(false)}>
+          <Pressable style={s.modal} onPress={e => e.stopPropagation()}>
+            <Text style={s.paywallIcon}>✦</Text>
+            <Text style={s.modalTitle}>Regenerações esgotadas</Text>
+            <Text style={s.paywallSub}>
+              Você usou suas {FREE_REGENS} regenerações gratuitas.{"\n"}
+              Compre créditos para continuar ajustando este convite.
+            </Text>
+            <View style={s.paywallBadge}>
+              <Text style={s.paywallBadgeTxt}>EM BREVE · PACOTE DE CRÉDITOS</Text>
+            </View>
+            <TouchableOpacity style={s.paywallClose} onPress={() => setPaywallVisible(false)}>
+              <Text style={s.paywallCloseTxt}>Fechar</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Modal de compartilhamento pós-publicação */}
       <Modal visible={!!shareModal} transparent animationType="fade">
@@ -453,6 +537,32 @@ const s = StyleSheet.create({
 
   guestBtn: { paddingVertical: 12 },
   guestBtnTxt: { fontSize: 12, color: "#FF4FA3", letterSpacing: 1 },
+
+  paywallIcon: { fontSize: 32, color: "#FF4FA3", marginBottom: 12 },
+  paywallSub: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.5)",
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  paywallBadge: {
+    backgroundColor: "rgba(255,79,163,0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255,79,163,0.3)",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 20,
+  },
+  paywallBadgeTxt: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#FF4FA3",
+    letterSpacing: 2,
+  },
+  paywallClose: { paddingVertical: 12 },
+  paywallCloseTxt: { fontSize: 12, color: "rgba(255,255,255,0.4)", letterSpacing: 1 },
 
   menuBtn: {
     position: "absolute",

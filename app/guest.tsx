@@ -25,11 +25,20 @@ export default function Guest() {
     (async () => {
       try {
         if (id) {
-          // Carrega evento do backend via link compartilhado
           const data = await loadEvent(id);
           setTheme({ ...BASE_THEME, ...(data.theme as AppTheme) });
           setEvent({ ...EVENT_CONFIG, ...(data.event as EventConfig) });
           setEventId(id);
+
+          // Se já confirmou neste dispositivo, vai direto para a tela de confirmação
+          const saved = await AsyncStorage.getItem(`confirmed_${id}`);
+          if (saved) {
+            const { name: n, guests: g } = JSON.parse(saved);
+            setName(n);
+            setGuests(g);
+            setScreen('confirm');
+            return;
+          }
         } else {
           // Fallback: carrega do AsyncStorage (mesmo dispositivo)
           const [[, rawTheme], [, rawEvent]] = await AsyncStorage.multiGet(['rsvp_theme', 'rsvp_event']);
@@ -49,6 +58,7 @@ export default function Guest() {
     setScreen('confirm');
     if (eventId) {
       submitRsvp(eventId, n, g, msg).catch(() => {});
+      AsyncStorage.setItem(`confirmed_${eventId}`, JSON.stringify({ name: n, guests: g })).catch(() => {});
     }
   };
 

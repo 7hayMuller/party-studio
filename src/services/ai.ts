@@ -152,6 +152,26 @@ export async function publishEvent(theme: AppTheme, event: object, token?: strin
   return eventId as string;
 }
 
+export async function updateEvent(eventId: string, theme: AppTheme, event: object, token: string): Promise<void> {
+  const res = await fetch(`${API_URL}/events/${eventId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ theme, event }),
+  });
+  if (!res.ok) throw new Error('Falha ao atualizar evento');
+}
+
+export async function deleteEvent(eventId: string, token: string): Promise<void> {
+  const res = await fetch(`${API_URL}/events/${eventId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Falha ao excluir evento');
+}
+
 export async function fetchMyEvents(token: string): Promise<{ id: string; event: any; created_at: string }[]> {
   const res = await fetch(`${API_URL}/events`, {
     headers: { 'Authorization': `Bearer ${token}` },

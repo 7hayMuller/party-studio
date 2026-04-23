@@ -272,6 +272,59 @@ app.get('/events/:id/rsvps', requireAuth, async (req, res) => {
   res.json({ rsvps });
 });
 
+app.patch('/events/:id', requireAuth, validate(eventSchema), async (req, res) => {
+  const eventId = req.params.id.toUpperCase();
+  const { theme, event } = req.body;
+
+  const { data } = await supabase
+    .from('events')
+    .select('host_id')
+    .eq('id', eventId)
+    .single();
+
+  if (!data || data.host_id !== req.user.id)
+    return res.status(403).json({ error: 'Acesso negado' });
+
+  const { error } = await supabase
+    .from('events')
+    .update({ theme, event })
+    .eq('id', eventId);
+
+  if (error) {
+    console.error('[PATCH /events] erro supabase:', error.message);
+    return res.status(500).json({ error: 'Falha ao atualizar evento' });
+  }
+
+  console.log(`[PATCH /events/${eventId}] Evento atualizado`);
+  res.json({ ok: true });
+});
+
+app.delete('/events/:id', requireAuth, async (req, res) => {
+  const eventId = req.params.id.toUpperCase();
+
+  const { data } = await supabase
+    .from('events')
+    .select('host_id')
+    .eq('id', eventId)
+    .single();
+
+  if (!data || data.host_id !== req.user.id)
+    return res.status(403).json({ error: 'Acesso negado' });
+
+  const { error } = await supabase
+    .from('events')
+    .delete()
+    .eq('id', eventId);
+
+  if (error) {
+    console.error('[DELETE /events] erro supabase:', error.message);
+    return res.status(500).json({ error: 'Falha ao excluir evento' });
+  }
+
+  console.log(`[DELETE /events/${eventId}] Evento excluído`);
+  res.json({ ok: true });
+});
+
 // ─── Health ───────────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ ok: true }));
 

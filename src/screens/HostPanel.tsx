@@ -36,43 +36,62 @@ const LOADING_MESSAGES = [
   'Quase pronto...',
 ];
 
+export interface HostPanelInitialValues {
+  a1?: string;
+  a2?: string;
+  bg?: string;
+  partyTitle?: string;
+  description?: string;
+  name?: string;
+  date?: string;
+  time?: string;
+  location?: string;
+  email?: string;
+  dressCode?: string;
+  musicUri?: string;
+  videoUri?: string;
+  youtubeVideoId?: string;
+}
+
 interface Props {
   onGenerate: (input: ThemeInput, event: typeof EVENT_CONFIG) => void;
   loading: boolean;
   source: 'api' | 'local' | null;
   theme: AppTheme;
+  initialValues?: HostPanelInitialValues;
+  isEditing?: boolean;
 }
 
-export default function HostPanel({ onGenerate, loading, source }: Props) {
+export default function HostPanel({ onGenerate, loading, source, initialValues, isEditing }: Props) {
   const [step, setStep] = useState(1);
 
   const [tipo, setTipo]               = useState('');
   const [vibes, setVibes]             = useState<string[]>([]);
 
-  const [a1, setA1]                   = useState('#ec4899');
-  const [a2, setA2]                   = useState('#f59e0b');
-  const [bg, setBg]                   = useState('#0a0a0a');
+  const [a1, setA1]                   = useState(initialValues?.a1 ?? '#ec4899');
+  const [a2, setA2]                   = useState(initialValues?.a2 ?? '#f59e0b');
+  const [bg, setBg]                   = useState(initialValues?.bg ?? '#0a0a0a');
   const [aiA1, setAiA1]               = useState(false);
   const [aiA2, setAiA2]               = useState(false);
   const [aiBg, setAiBg]               = useState(false);
 
-  const [partyTitle, setPartyTitle]   = useState('');
-  const [description, setDescription] = useState('');
+  const [partyTitle, setPartyTitle]   = useState(initialValues?.partyTitle ?? '');
+  const [description, setDescription] = useState(initialValues?.description ?? '');
   const [imageDescription, setImageDesc] = useState('');
   const [imageFile, setImageFile]     = useState<string | null>(null);
 
-  const [name, setName]         = useState('');
-  const [date, setDate]         = useState('');
-  const [time, setTime]         = useState('');
-  const [location, setLocation] = useState('');
-  const [email, setEmail]       = useState('');
-  const [dressCode, setDressCode] = useState('');
+  const [name, setName]         = useState(initialValues?.name ?? '');
+  const [date, setDate]         = useState(initialValues?.date ?? '');
+  const [time, setTime]         = useState(initialValues?.time ?? '');
+  const [location, setLocation] = useState(initialValues?.location ?? '');
+  const [email, setEmail]       = useState(initialValues?.email ?? '');
+  const [dressCode, setDressCode] = useState(initialValues?.dressCode ?? '');
   const [dressCodeImage, setDressCodeImage] = useState<string | null>(null);
-  const [musicUri, setMusicUri]         = useState('');
-  const [videoUri, setVideoUri]         = useState('');
-  const [musicTab, setMusicTab]         = useState<'file' | 'youtube'>('file');
+  const [musicUri, setMusicUri]         = useState(initialValues?.musicUri ?? '');
+  const [videoUri, setVideoUri]         = useState(initialValues?.videoUri ?? '');
+  const [musicTab, setMusicTab]         = useState<'file' | 'youtube'>(initialValues?.youtubeVideoId ? 'youtube' : 'file');
   const [youtubeUrl, setYoutubeUrl]     = useState('');
-  const [youtubeVideoId, setYoutubeVideoId] = useState('');
+  const [youtubeVideoId, setYoutubeVideoId] = useState(initialValues?.youtubeVideoId ?? '');
 
   // Loading screen state
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
@@ -432,7 +451,7 @@ export default function HostPanel({ onGenerate, loading, source }: Props) {
             )}
             <TouchableOpacity style={[s.nextBtn, step === 1 && s.nextBtnFull]} onPress={goNext}>
               <Text style={s.nextTxt}>
-                {step < 3 ? 'PRÓXIMO →' : '✦ GERAR CONVITE'}
+                {step < 3 ? 'PRÓXIMO →' : isEditing ? '✦ ATUALIZAR CONVITE' : '✦ GERAR CONVITE'}
               </Text>
             </TouchableOpacity>
           </View>

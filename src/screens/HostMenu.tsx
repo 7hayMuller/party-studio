@@ -1,23 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  ScrollView, Animated, ActivityIndicator, Modal, Pressable,
+  ScrollView, Animated, ActivityIndicator, Modal, Pressable, Alert,
 } from 'react-native';
-import { fetchMyEvents, fetchEventRsvps } from '../services/ai';
+import { fetchMyEvents, fetchEventRsvps, deleteEvent } from '../services/ai';
 import { getAccessToken } from '../services/auth';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
   onSignOut: () => void;
+  onEdit: (ev: any) => void;
 }
 
-export default function HostMenu({ visible, onClose, onSignOut }: Props) {
-  const [events, setEvents]           = useState<any[]>([]);
+export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props) {
+  const [events, setEvents]               = useState<any[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
-  const [rsvps, setRsvps]             = useState<any[]>([]);
-  const [loadingRsvps, setLoadingRsvps] = useState(false);
+  const [rsvps, setRsvps]                 = useState<any[]>([]);
+  const [loadingRsvps, setLoadingRsvps]   = useState(false);
+  const [deletingId, setDeletingId]       = useState<string | null>(null);
 
   const slideAnim = useRef(new Animated.Value(340)).current;
   const fadeAnim  = useRef(new Animated.Value(0)).current;
@@ -67,6 +69,38 @@ export default function HostMenu({ visible, onClose, onSignOut }: Props) {
     }
   };
 
+  const handleDelete = (ev: any) => {
+    Alert.alert(
+      'Excluir convite',
+      `Tem certeza que deseja excluir "${ev.event?.name || ev.id}"? Esta ação não pode ser desfeita.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir', style: 'destructive',
+          onPress: async () => {
+            setDeletingId(ev.id);
+            try {
+              const token = await getAccessToken();
+              if (!token) return;
+              await deleteEvent(ev.id, token);
+              setEvents(prev => prev.filter(e => e.id !== ev.id));
+              if (selectedEvent?.id === ev.id) setSelectedEvent(null);
+            } catch {
+              Alert.alert('Erro', 'Não foi possível excluir o convite.');
+            } finally {
+              setDeletingId(null);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const handleEdit = (ev: any) => {
+    onClose();
+    onEdit(ev);
+  };
+
   const totalPeople = (rsvps: any[]) =>
     rsvps.reduce((acc, r) => acc + 1 + (r.guests ?? 0), 0);
 
@@ -97,6 +131,21 @@ export default function HostMenu({ visible, onClose, onSignOut }: Props) {
             <Text style={s.eventHeaderMeta}>
               {selectedEvent.event?.date}  ·  {selectedEvent.event?.location}
             </Text>
+            <View style={s.eventActions}>
+              <TouchableOpacity style={s.editBtn} onPress={() => handleEdit(selectedEvent)}>
+                <Text style={s.editTxt}>✎ EDITAR</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={s.deleteBtn}
+                onPress={() => handleDelete(selectedEvent)}
+                disabled={deletingId === selectedEvent.id}
+              >
+                {deletingId === selectedEvent.id
+                  ? <ActivityIndicator color="#ef4444" size="small" />
+                  : <Text style={s.deleteTxt}>⌫ EXCLUIR</Text>
+                }
+              </TouchableOpacity>
+            </View>
           </View>
         )}
 
@@ -109,17 +158,34 @@ export default function HostMenu({ visible, onClose, onSignOut }: Props) {
               <Text style={s.emptyTxt}>Nenhum convite criado ainda.</Text>
             ) : (
               events.map(ev => (
-                <TouchableOpacity key={ev.id} style={s.eventCard} onPress={() => openEvent(ev)}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.eventName}>{ev.event?.name || '—'}</Text>
-                    <Text style={s.eventMeta}>
-                      {ev.event?.date}  ·  {ev.event?.location || 'Local não definido'}
-                    </Text>
+                <View key={ev.id} style={s.eventCard}>
+                  <TouchableOpacity style={s.eventCardMain} onPress={() => openEvent(ev)}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.eventName}>{ev.event?.name || '—'}</Text>
+                      <Text style={s.eventMeta}>
+                        {ev.event?.date}  ·  {ev.event?.location || 'Local não definido'}
+                      </Text>
+                    </View>
+                    <View style={s.eventCodeBox}>
+                      <Text style={s.eventCode}>{ev.id}</Text>
+                    </View>
+                  </TouchableOpacity>
+                  <View style={s.cardActions}>
+                    <TouchableOpacity style={s.cardEditBtn} onPress={() => handleEdit(ev)}>
+                      <Text style={s.cardEditTxt}>✎ Editar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={s.cardDeleteBtn}
+                      onPress={() => handleDelete(ev)}
+                      disabled={deletingId === ev.id}
+                    >
+                      {deletingId === ev.id
+                        ? <ActivityIndicator color="#ef4444" size="small" />
+                        : <Text style={s.cardDeleteTxt}>Excluir</Text>
+                      }
+                    </TouchableOpacity>
                   </View>
-                  <View style={s.eventCodeBox}>
-                    <Text style={s.eventCode}>{ev.id}</Text>
-                  </View>
-                </TouchableOpacity>
+                </View>
               ))
             )
           ) : (
@@ -204,9 +270,31 @@ const s = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.06)',
+    gap: 2,
   },
   eventHeaderName: { fontSize: 16, fontWeight: '900', color: '#fff', marginBottom: 2 },
-  eventHeaderMeta: { fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: 1 },
+  eventHeaderMeta: { fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: 1, marginBottom: 10 },
+  eventActions:    { flexDirection: 'row', gap: 8 },
+  editBtn: {
+    flex: 1,
+    backgroundColor: 'rgba(0,220,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,220,255,0.25)',
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  editTxt:   { fontSize: 10, color: '#00dcff', fontWeight: '700', letterSpacing: 1 },
+  deleteBtn: {
+    flex: 1,
+    backgroundColor: 'rgba(239,68,68,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.25)',
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  deleteTxt: { fontSize: 10, color: '#ef4444', fontWeight: '700', letterSpacing: 1 },
 
   emptyTxt: {
     fontSize: 12,
@@ -217,14 +305,17 @@ const s = StyleSheet.create({
   },
 
   eventCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.07)',
-    padding: 14,
     marginBottom: 10,
+    overflow: 'hidden',
+  },
+  eventCardMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
   },
   eventName: { fontSize: 14, fontWeight: '700', color: '#fff', marginBottom: 4 },
   eventMeta: { fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: 0.5 },
@@ -237,6 +328,21 @@ const s = StyleSheet.create({
     borderColor: 'rgba(0,220,255,0.2)',
   },
   eventCode: { fontSize: 12, fontWeight: '900', color: '#00dcff', letterSpacing: 2 },
+  cardActions: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  cardEditBtn: {
+    flex: 1,
+    paddingVertical: 9,
+    alignItems: 'center',
+    borderRightWidth: 1,
+    borderRightColor: 'rgba(255,255,255,0.06)',
+  },
+  cardEditTxt:   { fontSize: 10, color: '#00dcff', fontWeight: '700', letterSpacing: 1 },
+  cardDeleteBtn: { flex: 1, paddingVertical: 9, alignItems: 'center' },
+  cardDeleteTxt: { fontSize: 10, color: '#ef4444', fontWeight: '700', letterSpacing: 1 },
 
   rsvpSummary: {
     alignItems: 'center',
