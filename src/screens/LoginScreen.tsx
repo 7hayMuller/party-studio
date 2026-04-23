@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Alert,
+  ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Alert, Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { signInWithGoogle, signInWithEmail, signUpWithEmail } from '../services/auth';
@@ -51,10 +51,9 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={s.inner} keyboardShouldPersistTaps="handled">
 
           {/* Logo */}
-          <View style={s.logoWrap}>
-            <Text style={s.logoEmoji}>🎉</Text>
-            <Text style={s.logoTitle}>Party Studio</Text>
-            <Text style={s.logoSub}>Crie convites que surpreendem</Text>
+          <View style={s.logoWrap}>            
+            <Image source={require('../../assets/partystudio-logo.png')} style={s.logoImg} resizeMode="contain" />
+            <Text style={s.logoSub}>Crie seus convites com a ajuda da IA e surpreenda!</Text>
           </View>
 
           {/* Card */}
@@ -125,10 +124,9 @@ const s = StyleSheet.create({
   root:  { flex: 1 },
   inner: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
 
-  logoWrap:  { alignItems: 'center', marginBottom: 36 },
-  logoEmoji: { fontSize: 48, marginBottom: 8 },
-  logoTitle: { fontSize: 28, fontWeight: '900', color: '#fff', letterSpacing: 2 },
-  logoSub:   { fontSize: 12, color: 'rgba(255,255,255,0.35)', letterSpacing: 1, marginTop: 6 },
+  logoWrap:  { alignItems: 'center', marginBottom: 10 },
+  logoImg:   { width: 500, height: 200 },
+  logoSub:   { fontSize: 12, color: 'rgba(255,255,255,0.35)', letterSpacing: 1, marginTop: -50, marginBottom: 24, textAlign: 'center' },
 
   card: {
     width: '100%',
@@ -152,13 +150,13 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#EA4335',
     borderRadius: 12,
     paddingVertical: 14,
     marginBottom: 20,
   },
-  googleIcon: { fontSize: 16, fontWeight: '900', color: '#4285F4' },
-  googleTxt:  { fontSize: 13, fontWeight: '700', color: '#111' },
+  googleIcon: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  googleTxt:  { fontSize: 13, fontWeight: '700', color: '#fff' },
 
   divider:  { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
   divLine:  { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.08)' },
@@ -176,13 +174,12 @@ const s = StyleSheet.create({
   },
 
   submitBtn: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FF4FA3',
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: 'center',
     marginTop: 20,
   },
-  submitTxt: { fontSize: 12, fontWeight: '800', color: '#000', letterSpacing: 2 },
-
+  submitTxt: { fontSize: 16, fontWeight: '600', color: '#fff', letterSpacing: 2 },
   footer: { marginTop: 32, fontSize: 10, letterSpacing: 2, color: 'rgba(255,255,255,0.2)' },
 });

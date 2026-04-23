@@ -494,9 +494,9 @@ const s = StyleSheet.create({
 
   // Navigation
   navRow:        { flexDirection: 'row', gap: 10, marginTop: 24 },
-  backBtn:       { flex: 1, backgroundColor: '#141414', borderWidth: 1, borderColor: '#252525', borderRadius: 10, padding: 16, alignItems: 'center' },
+  backBtn:       { flex: 1, backgroundColor: 'transparent', borderWidth: 1, borderColor: '#FF4FA3', borderRadius: 10, padding: 16, alignItems: 'center' },
   backTxt:       { color: '#777', fontSize: 12, fontWeight: '600', letterSpacing: 2 },
-  nextBtn:       { flex: 2, backgroundColor: '#1a1a1a', borderWidth: 1, borderColor: '#333', borderRadius: 10, padding: 16, alignItems: 'center' },
+  nextBtn:       { flex: 2, backgroundColor: '#FF4FA3', borderWidth: 1, borderColor: '#FF7ABF', borderRadius: 10, padding: 16, alignItems: 'center' },
   nextBtnFull:   { flex: 1 },
   nextTxt:       { color: '#fff', fontSize: 13, fontWeight: '600', letterSpacing: 2 },
 });
