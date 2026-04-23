@@ -150,17 +150,42 @@ export default function Host() {
         </View>
       )}
 
-      {screen === 'intro' && (
-        <IntroScreen theme={theme} event={event} onNext={() => setScreen('form')} />
-      )}
-      {screen === 'form' && (
-        <FormScreen theme={theme} event={event} onConfirm={handleConfirm} />
-      )}
-      {screen === 'confirm' && (
-        <ConfirmScreen
-          theme={theme} event={event} name={name} guests={guests}
-          onReset={() => { setName(''); setGuests(0); setScreen('editing'); }}
-        />
+      {(screen === 'intro' || screen === 'form' || screen === 'confirm') && (
+        <>
+          {screen === 'intro'   && <IntroScreen   theme={theme} event={event} onNext={() => setScreen('form')} />}
+          {screen === 'form'    && <FormScreen     theme={theme} event={event} onConfirm={handleConfirm} />}
+          {screen === 'confirm' && (
+            <ConfirmScreen
+              theme={theme} event={event} name={name} guests={guests}
+              onReset={() => { setName(''); setGuests(0); setScreen('editing'); }}
+            />
+          )}
+
+          {/* Barra de simulação */}
+          <View style={s.simBar}>
+            <View style={s.previewTag}>
+              <Text style={s.previewTagTxt}>SIMULANDO</Text>
+            </View>
+            <View style={s.previewActions}>
+              <TouchableOpacity
+                style={[s.previewBtn, s.regenBtn]}
+                onPress={() => setScreen('preview')}
+              >
+                <Text style={s.regenTxt}>← EDITAR</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.previewBtn, s.publishBtn]}
+                onPress={handlePublish}
+                disabled={publishing}
+              >
+                {publishing
+                  ? <ActivityIndicator color="#000" size="small" />
+                  : <Text style={s.publishTxt}>✓ PUBLICAR</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          </View>
+        </>
       )}
 
       <HostMenu
@@ -202,6 +227,17 @@ export default function Host() {
 const s = StyleSheet.create({
   root: { flex: 1 },
 
+  simBar: {
+    position: 'absolute',
+    bottom: 0, left: 0, right: 0,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 28,
+    gap: 10,
+  },
   previewBar: {
     position: 'absolute',
     bottom: 0, left: 0, right: 0,
