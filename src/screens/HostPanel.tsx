@@ -6,35 +6,26 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
+import { useTranslation } from 'react-i18next';
 import ColorPicker from '../components/ColorPicker';
 import StarBurst from '../components/StarBurst';
 import { ThemeInput } from '../services/ai';
 import { AppTheme, EVENT_CONFIG } from '../config/theme';
 
-const TIPOS = [
-  { label: '🎂 Aniversário', value: 'aniversário' },
-  { label: '💍 Casamento',   value: 'casamento' },
-  { label: '🎃 Halloween',   value: 'halloween' },
-  { label: '🌽 Junina',      value: 'junina' },
-  { label: '🌴 Tropical',    value: 'tropical' },
-  { label: '🎭 Carnaval',    value: 'carnaval' },
-  { label: '🎓 Formatura',   value: 'formatura' },
-  { label: '🏢 Corporativo', value: 'corporativo' },
-  { label: '🎉 Outro',       value: 'outro' },
+const TIPOS_VALUES = [
+  { key: 'birthday',   value: 'aniversário' },
+  { key: 'wedding',    value: 'casamento' },
+  { key: 'halloween',  value: 'halloween' },
+  { key: 'junina',     value: 'junina' },
+  { key: 'tropical',   value: 'tropical' },
+  { key: 'carnival',   value: 'carnaval' },
+  { key: 'graduation', value: 'formatura' },
+  { key: 'corporate',  value: 'corporativo' },
+  { key: 'other',      value: 'outro' },
 ];
 
-const VIBES = [
-  'Elegante', 'Animado', 'Dark', 'Colorido',
-  'Minimalista', 'Glam', 'Futurista', 'Retrô',
-];
-
-const LOADING_MESSAGES = [
-  'Escolhendo as cores perfeitas...',
-  'Escrevendo o título da festa...',
-  'Montando o convite...',
-  'Aplicando o tema...',
-  'Quase pronto...',
-];
+const VIBES_KEYS = ['elegant', 'lively', 'dark', 'colorful', 'minimalist', 'glam', 'futuristic', 'retro'] as const;
+const LOADING_MSG_KEYS = ['loadingMsg1', 'loadingMsg2', 'loadingMsg3', 'loadingMsg4', 'loadingMsg5'] as const;
 
 export interface HostPanelInitialValues {
   a1?: string;
@@ -63,6 +54,10 @@ interface Props {
 }
 
 export default function HostPanel({ onGenerate, loading, source, initialValues, isEditing }: Props) {
+  const { t } = useTranslation();
+  const TIPOS = TIPOS_VALUES.map(tp => ({ label: t(`hostPanel.tipos.${tp.key}` as any), value: tp.value }));
+  const VIBES = VIBES_KEYS.map(k => t(`hostPanel.vibes.${k}` as any));
+  const LOADING_MESSAGES = LOADING_MSG_KEYS.map(k => t(`hostPanel.${k}` as any));
   const [step, setStep] = useState(1);
 
   const [tipo, setTipo]               = useState('');
@@ -129,7 +124,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
 
   const pickVideo = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { Alert.alert('Permissão necessária', 'Precisa de acesso à galeria.'); return; }
+    if (!perm.granted) { Alert.alert(t('common.permissionRequired'), t('common.galleryPermission')); return; }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['videos'],
       allowsEditing: false,
@@ -140,7 +135,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
 
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { Alert.alert('Permissão necessária', 'Precisa de acesso à galeria.'); return; }
+    if (!perm.granted) { Alert.alert(t('common.permissionRequired'), t('common.galleryPermission')); return; }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
@@ -152,7 +147,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
 
   const pickDressCodeImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { Alert.alert('Permissão necessária', 'Precisa de acesso à galeria.'); return; }
+    if (!perm.granted) { Alert.alert(t('common.permissionRequired'), t('common.galleryPermission')); return; }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
@@ -162,7 +157,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
   };
 
   const goNext = () => {
-    if (step === 1 && !tipo) { Alert.alert('Selecione o tipo da festa'); return; }
+    if (step === 1 && !tipo) { Alert.alert(t('hostPanel.selectPartyType')); return; }
     if (step < 3) { setStep(s => s + 1); return; }
     onGenerate(
       {
@@ -203,7 +198,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
           <Animated.Text style={[s.loadMsg, { opacity: fadeAnim }]}>
             {LOADING_MESSAGES[loadingMsgIdx]}
           </Animated.Text>
-          <Text style={s.loadSub}>A IA está criando seu convite</Text>
+          <Text style={s.loadSub}>{t('hostPanel.loadingSubtitle')}</Text>
         </View>
       </View>
     );
@@ -222,7 +217,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
           keyboardShouldPersistTaps="handled"
         >
           <Text style={s.logo}>✦ PARTY STUDIO ✦</Text>
-          <Text style={s.title}>Personalize seu convite</Text>
+          <Text style={s.title}>{t('hostPanel.title')}</Text>
 
           {/* STEP INDICATOR */}
           <View style={s.stepRow}>
@@ -236,15 +231,15 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
             ))}
           </View>
           <Text style={s.stepLabel}>
-            {step === 1 && 'Tipo e estilo'}
-            {step === 2 && 'Palheta e mídia'}
-            {step === 3 && 'Dados do evento'}
+            {step === 1 && t('hostPanel.step1Label')}
+            {step === 2 && t('hostPanel.step2Label')}
+            {step === 3 && t('hostPanel.step3Label')}
           </Text>
 
           {/* STEP 1 */}
           {step === 1 && (
             <>
-              <Text style={s.lbl}>TIPO DA FESTA</Text>
+              <Text style={s.lbl}>{t('hostPanel.partyTypeLabel')}</Text>
               <View style={s.chips}>
                 {TIPOS.map(t => (
                   <TouchableOpacity
@@ -257,7 +252,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
                 ))}
               </View>
 
-              <Text style={[s.lbl, { marginTop: 20 }]}>CLIMA (pode escolher mais de um)</Text>
+              <Text style={[s.lbl, { marginTop: 20 }]}>{t('hostPanel.vibesLabel')}</Text>
               <View style={s.chips}>
                 {VIBES.map(v => (
                   <TouchableOpacity
@@ -270,17 +265,17 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
                 ))}
               </View>
 
-              <Text style={[s.lbl, { marginTop: 20 }]}>TÍTULO E DESCRIÇÃO</Text>
+              <Text style={[s.lbl, { marginTop: 20 }]}>{t('hostPanel.titleDescLabel')}</Text>
               <TextInput
                 style={s.inp}
-                placeholder="Título da festa — deixe em branco para a IA criar"
+                placeholder={t('hostPanel.titlePlaceholder')}
                 placeholderTextColor="#444"
                 value={partyTitle}
                 onChangeText={setPartyTitle}
               />
               <TextInput
                 style={[s.inp, s.ta]}
-                placeholder="Descrição — deixe em branco para a IA criar"
+                placeholder={t('hostPanel.descPlaceholder')}
                 placeholderTextColor="#444"
                 value={description}
                 onChangeText={setDescription}
@@ -294,25 +289,25 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
           {step === 2 && (
             <>              
               <ColorPicker
-                label="COR PRINCIPAL (bordas, botões)"
+                label={t('hostPanel.colorPrimary')}
                 value={a1} aiMode={aiA1}
                 onChangeColor={setA1} onToggleAi={setAiA1}
               />
               <ColorPicker
-                label="COR SECUNDÁRIA (degradê, contraste)"
+                label={t('hostPanel.colorSecondary')}
                 value={a2} aiMode={aiA2}
                 onChangeColor={setA2} onToggleAi={setAiA2}
               />
               <ColorPicker
-                label="COR DE FUNDO"
+                label={t('hostPanel.colorBg')}
                 value={bg} aiMode={aiBg}
                 onChangeColor={setBg} onToggleAi={setAiBg}
               />
 
-              <Text style={[s.lbl, { marginTop: 16 }]}>IMAGEM DE CAPA</Text>
+              <Text style={[s.lbl, { marginTop: 16 }]}>{t('hostPanel.coverImageLabel')}</Text>
               <TextInput
                 style={[s.inp, s.ta]}
-                placeholder="Descreva a imagem — deixe em branco para a IA criar"
+                placeholder={t('hostPanel.coverImagePlaceholder')}
                 placeholderTextColor="#444"
                 value={imageDescription}
                 onChangeText={setImageDesc}
@@ -321,7 +316,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
               />
               <View style={s.uploadRow}>
                 <TouchableOpacity style={s.uploadBtn} onPress={pickImage}>
-                  <Text style={s.uploadTxt}>{imageFile ? '🔄 TROCAR IMAGEM' : '📁 ESCOLHER DA GALERIA'}</Text>
+                  <Text style={s.uploadTxt}>{imageFile ? t('hostPanel.changeImage') : t('hostPanel.pickImage')}</Text>
                 </TouchableOpacity>
                 {imageFile && (
                   <TouchableOpacity style={s.removeBtn} onPress={() => setImageFile(null)}>
@@ -333,19 +328,19 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
                 <Image source={{ uri: imageFile }} style={s.preview} resizeMode="cover" />
               )}
 
-              <Text style={[s.lbl, { marginTop: 16 }]}>MÚSICA DE FUNDO</Text>
+              <Text style={[s.lbl, { marginTop: 16 }]}>{t('hostPanel.musicLabel')}</Text>
               <View style={s.tabRow}>
                 <TouchableOpacity
                   style={[s.tabBtn, musicTab === 'file' && s.tabBtnActive]}
                   onPress={() => setMusicTab('file')}
                 >
-                  <Text style={[s.tabTxt, musicTab === 'file' && s.tabTxtActive]}>📁 Arquivo</Text>
+                  <Text style={[s.tabTxt, musicTab === 'file' && s.tabTxtActive]}>{t('hostPanel.tabFile')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[s.tabBtn, musicTab === 'youtube' && s.tabBtnActive]}
                   onPress={() => setMusicTab('youtube')}
                 >
-                  <Text style={[s.tabTxt, musicTab === 'youtube' && s.tabTxtActive]}>▶ YouTube</Text>
+                  <Text style={[s.tabTxt, musicTab === 'youtube' && s.tabTxtActive]}>{t('hostPanel.tabYoutube')}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -353,7 +348,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
                 <>
                   <View style={s.uploadRow}>
                     <TouchableOpacity style={s.uploadBtn} onPress={pickMusic}>
-                      <Text style={s.uploadTxt}>{musicUri ? '🔄 TROCAR MÚSICA' : '🎵 ESCOLHER MÚSICA'}</Text>
+                      <Text style={s.uploadTxt}>{musicUri ? t('hostPanel.changeMusic') : t('hostPanel.pickMusic')}</Text>
                     </TouchableOpacity>
                     {musicUri && (
                       <TouchableOpacity style={s.removeBtn} onPress={() => setMusicUri('')}>
@@ -363,14 +358,14 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
                   </View>
                   {musicUri
                     ? <Text style={s.mediaName} numberOfLines={1}>♪ {musicUri.split('/').pop()}</Text>
-                    : <Text style={s.mediaSub}>Opcional — toca enquanto o convidado vê o convite</Text>
+                    : <Text style={s.mediaSub}>{t('hostPanel.musicOptional')}</Text>
                   }
                 </>
               ) : (
                 <>
                   <TextInput
                     style={s.inp}
-                    placeholder="Cole o link do YouTube (ex: youtu.be/abc123)"
+                    placeholder={t('hostPanel.youtubePlaceholder')}
                     placeholderTextColor="#444"
                     value={youtubeUrl}
                     onChangeText={parseYouTubeUrl}
@@ -378,17 +373,17 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
                     keyboardType="url"
                   />
                   {youtubeVideoId
-                    ? <Text style={s.mediaName}>▶ ID detectado: {youtubeVideoId}</Text>
+                    ? <Text style={s.mediaName}>{t('hostPanel.youtubeDetected', { id: youtubeVideoId })}</Text>
                     : <Text style={s.mediaSub}>
-                        {youtubeUrl.length > 5 ? '⚠ URL inválida — use youtu.be/... ou youtube.com/watch?v=...' : 'Toca em loop enquanto o convidado vê o convite'}
+                        {youtubeUrl.length > 5 ? t('hostPanel.youtubeInvalid') : t('hostPanel.youtubeHint')}
                       </Text>
                   }
                 </>
               )}
-              <Text style={[s.lbl, { marginTop: 16 }]}>VÍDEO DA TELA DE CONFIRMAÇÃO</Text>
+              <Text style={[s.lbl, { marginTop: 16 }]}>{t('hostPanel.videoLabel')}</Text>
               <View style={s.uploadRow}>
                 <TouchableOpacity style={s.uploadBtn} onPress={pickVideo}>
-                  <Text style={s.uploadTxt}>{videoUri ? '🔄 TROCAR VÍDEO' : '🎬 ESCOLHER VÍDEO'}</Text>
+                  <Text style={s.uploadTxt}>{videoUri ? t('hostPanel.changeVideo') : t('hostPanel.pickVideo')}</Text>
                 </TouchableOpacity>
                 {videoUri && (
                   <TouchableOpacity style={s.removeBtn} onPress={() => setVideoUri('')}>
@@ -399,7 +394,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
               {videoUri ? (
                 <Text style={s.mediaName} numberOfLines={1}>▶ {videoUri.split('/').pop()}</Text>
               ) : (
-                <Text style={s.mediaSub}>Opcional — aparece como fundo quando o convidado confirmar presença</Text>
+                <Text style={s.mediaSub}>{t('hostPanel.videoOptional')}</Text>
               )}
             </>
           )}
@@ -407,20 +402,20 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
           {/* STEP 3 */}
           {step === 3 && (
             <>              
-              <TextInput style={s.inp} placeholder="Nome do evento" placeholderTextColor="#444" value={name} onChangeText={setName} />
+              <TextInput style={s.inp} placeholder={t('hostPanel.eventNamePlaceholder')} placeholderTextColor="#444" value={name} onChangeText={setName} />
               <View style={s.row}>
-                <TextInput style={[s.inp, { flex: 1 }]} placeholder="Data (ex: 15 AGOSTO)" placeholderTextColor="#444" value={date} onChangeText={setDate} />
+                <TextInput style={[s.inp, { flex: 1 }]} placeholder={t('hostPanel.datePlaceholder')} placeholderTextColor="#444" value={date} onChangeText={setDate} />
                 <View style={{ width: 8 }} />
-                <TextInput style={[s.inp, { flex: 1 }]} placeholder="Horário" placeholderTextColor="#444" value={time} onChangeText={setTime} />
+                <TextInput style={[s.inp, { flex: 1 }]} placeholder={t('hostPanel.timePlaceholder')} placeholderTextColor="#444" value={time} onChangeText={setTime} />
               </View>
-              <TextInput style={s.inp} placeholder="Local do evento" placeholderTextColor="#444" value={location} onChangeText={setLocation} />
-              <TextInput style={s.inp} placeholder="E-mail para receber as confirmações" placeholderTextColor="#444" value={email} onChangeText={setEmail} keyboardType="email-address" />
-              <TextInput style={s.inp} placeholder="Dress Code" placeholderTextColor="#444" value={dressCode} onChangeText={setDressCode} />
+              <TextInput style={s.inp} placeholder={t('hostPanel.locationPlaceholder')} placeholderTextColor="#444" value={location} onChangeText={setLocation} />
+              <TextInput style={s.inp} placeholder={t('hostPanel.emailPlaceholder')} placeholderTextColor="#444" value={email} onChangeText={setEmail} keyboardType="email-address" />
+              <TextInput style={s.inp} placeholder={t('hostPanel.dressCodePlaceholder')} placeholderTextColor="#444" value={dressCode} onChangeText={setDressCode} />
 
-              <Text style={[s.lbl, { marginTop: 8 }]}>IMAGEM MODELO DE DRESS CODE</Text>
+              <Text style={[s.lbl, { marginTop: 8 }]}>{t('hostPanel.dressCodeImageLabel')}</Text>
               <View style={s.uploadRow}>
                 <TouchableOpacity style={s.uploadBtn} onPress={pickDressCodeImage}>
-                  <Text style={s.uploadTxt}>{dressCodeImage ? '🔄 TROCAR IMAGEM' : '👗 ESCOLHER IMAGEM'}</Text>
+                  <Text style={s.uploadTxt}>{dressCodeImage ? t('hostPanel.changeDressImage') : t('hostPanel.pickDressImage')}</Text>
                 </TouchableOpacity>
                 {dressCodeImage && (
                   <TouchableOpacity style={s.removeBtn} onPress={() => setDressCodeImage(null)}>
@@ -431,12 +426,12 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
               {dressCodeImage ? (
                 <Image source={{ uri: dressCodeImage }} style={s.preview} resizeMode="cover" />
               ) : (
-                <Text style={s.mediaSub}>Opcional — exemplo visual do look esperado</Text>
+                <Text style={s.mediaSub}>{t('hostPanel.dressImageOptional')}</Text>
               )}
 
               {source && (
                 <Text style={[s.src, { color: source === 'api' ? '#4ade80' : '#fbbf24' }]}>
-                  {source === 'api' ? '✓ Tema gerado pela IA' : '⚡ Preset local (backend offline)'}
+                  {source === 'api' ? t('hostPanel.sourceApi') : t('hostPanel.sourceLocal')}
                 </Text>
               )}
             </>
@@ -446,12 +441,12 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
           <View style={s.navRow}>
             {step > 1 && (
               <TouchableOpacity style={s.backBtn} onPress={() => setStep(s => s - 1)}>
-                <Text style={s.backTxt}>← VOLTAR</Text>
+                <Text style={s.backTxt}>{t('common.back')}</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity style={[s.nextBtn, step === 1 && s.nextBtnFull]} onPress={goNext}>
               <Text style={s.nextTxt}>
-                {step < 3 ? 'PRÓXIMO →' : isEditing ? '✦ ATUALIZAR CONVITE' : '✦ GERAR CONVITE'}
+                {step < 3 ? t('common.next') : isEditing ? t('hostPanel.update') : t('hostPanel.generate')}
               </Text>
             </TouchableOpacity>
           </View>

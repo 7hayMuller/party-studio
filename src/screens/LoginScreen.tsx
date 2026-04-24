@@ -4,9 +4,11 @@ import {
   ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Alert, Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { signInWithGoogle, signInWithEmail, signUpWithEmail } from '../services/auth';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [tab, setTab]         = useState<'login' | 'signup'>('login');
   const [email, setEmail]     = useState('');
   const [password, setPassword] = useState('');
@@ -17,7 +19,7 @@ export default function LoginScreen() {
     try {
       await signInWithGoogle();
     } catch (e: any) {
-      Alert.alert('Erro', e.message ?? 'Falha no login com Google');
+      Alert.alert(t('common.error'), e.message ?? t('login.errorGoogle'));
     } finally {
       setLoading(false);
     }
@@ -25,7 +27,7 @@ export default function LoginScreen() {
 
   const handleEmail = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Atenção', 'Preencha email e senha.');
+      Alert.alert(t('common.attention'), t('login.errorFillFields'));
       return;
     }
     setLoading(true);
@@ -35,11 +37,11 @@ export default function LoginScreen() {
       } else {
         const { needsConfirmation } = await signUpWithEmail(email.trim(), password);
         if (needsConfirmation) {
-          Alert.alert('Confirme seu email', 'Verifique sua caixa de entrada e clique no link de confirmação.');
+          Alert.alert(t('login.confirmEmailTitle'), t('login.confirmEmailBody'));
         }
       }
     } catch (e: any) {
-      Alert.alert('Erro', e.message || 'Falha na autenticação');
+      Alert.alert(t('common.error'), e.message || t('login.errorAuth'));
     } finally {
       setLoading(false);
     }
@@ -53,17 +55,17 @@ export default function LoginScreen() {
           {/* Logo */}
           <View style={s.logoWrap}>            
             <Image source={require('../../assets/partystudio-logo.png')} style={s.logoImg} resizeMode="contain" />
-            <Text style={s.logoSub}>Crie seus convites com a ajuda da IA e surpreenda!</Text>
+            <Text style={s.logoSub}>{t('login.tagline')}</Text>
           </View>
 
           {/* Card */}
           <View style={s.card}>
             {/* Tabs */}
             <View style={s.tabs}>
-              {(['login', 'signup'] as const).map(t => (
-                <TouchableOpacity key={t} style={[s.tab, tab === t && s.tabActive]} onPress={() => setTab(t)}>
-                  <Text style={[s.tabTxt, tab === t && s.tabTxtActive]}>
-                    {t === 'login' ? 'Entrar' : 'Criar conta'}
+              {(['login', 'signup'] as const).map(tabKey => (
+                <TouchableOpacity key={tabKey} style={[s.tab, tab === tabKey && s.tabActive]} onPress={() => setTab(tabKey)}>
+                  <Text style={[s.tabTxt, tab === tabKey && s.tabTxtActive]}>
+                    {tabKey === 'login' ? t('login.tabLogin') : t('login.tabSignup')}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -72,21 +74,21 @@ export default function LoginScreen() {
             {/* Google */}
             <TouchableOpacity style={s.googleBtn} onPress={handleGoogle} disabled={loading}>
               <Text style={s.googleIcon}>G</Text>
-              <Text style={s.googleTxt}>Continuar com Google</Text>
+              <Text style={s.googleTxt}>{t('login.google')}</Text>
             </TouchableOpacity>
 
             {/* Divider */}
             <View style={s.divider}>
               <View style={s.divLine} />
-              <Text style={s.divTxt}>ou</Text>
+              <Text style={s.divTxt}>{t('login.or')}</Text>
               <View style={s.divLine} />
             </View>
 
             {/* Email/Senha */}
-            <Text style={s.lbl}>EMAIL</Text>
+            <Text style={s.lbl}>{t('login.emailLabel')}</Text>
             <TextInput
               style={s.inp}
-              placeholder="seu@email.com"
+              placeholder={t('login.emailPlaceholder')}
               placeholderTextColor="#333"
               value={email}
               onChangeText={setEmail}
@@ -95,10 +97,10 @@ export default function LoginScreen() {
               autoCorrect={false}
             />
 
-            <Text style={[s.lbl, { marginTop: 14 }]}>SENHA</Text>
+            <Text style={[s.lbl, { marginTop: 14 }]}>{t('login.passwordLabel')}</Text>
             <TextInput
               style={s.inp}
-              placeholder="mínimo 6 caracteres"
+              placeholder={t('login.passwordPlaceholder')}
               placeholderTextColor="#333"
               value={password}
               onChangeText={setPassword}
@@ -108,12 +110,12 @@ export default function LoginScreen() {
             <TouchableOpacity style={s.submitBtn} onPress={handleEmail} disabled={loading}>
               {loading
                 ? <ActivityIndicator color="#000" />
-                : <Text style={s.submitTxt}>{tab === 'login' ? '▸ ENTRAR' : '▸ CRIAR CONTA'}</Text>
+                : <Text style={s.submitTxt}>{tab === 'login' ? t('login.submitLogin') : t('login.submitSignup')}</Text>
               }
             </TouchableOpacity>
           </View>
 
-          <Text style={s.footer}>feito com amor ♥ Party Studio</Text>
+          <Text style={s.footer}>{t('common.footer')}</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>

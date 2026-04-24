@@ -1,10 +1,12 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export default function FooterBrand({ color = 'rgba(255,255,255,0.22)' }: { color?: string }) {
+  const { t } = useTranslation();
   return (
     <Text style={[s.footer, { color }]}>
-      feito com amor ♥ Party Studio
+      {t('common.footer')}
     </Text>
   );
 }

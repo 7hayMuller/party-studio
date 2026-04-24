@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, Animated, ActivityIndicator, Modal, Pressable, Alert,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { fetchMyEvents, fetchEventRsvps, deleteEvent } from '../services/ai';
 import { getAccessToken } from '../services/auth';
 
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props) {
+  const { t } = useTranslation();
   const [events, setEvents]               = useState<any[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
@@ -71,12 +73,12 @@ export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props)
 
   const handleDelete = (ev: any) => {
     Alert.alert(
-      'Excluir convite',
-      `Tem certeza que deseja excluir "${ev.event?.name || ev.id}"? Esta ação não pode ser desfeita.`,
+      t('hostMenu.deleteTitle'),
+      t('hostMenu.deleteConfirm', { name: ev.event?.name || ev.id }),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Excluir', style: 'destructive',
+          text: t('common.delete'), style: 'destructive',
           onPress: async () => {
             setDeletingId(ev.id);
             try {
@@ -86,7 +88,7 @@ export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props)
               setEvents(prev => prev.filter(e => e.id !== ev.id));
               if (selectedEvent?.id === ev.id) setSelectedEvent(null);
             } catch {
-              Alert.alert('Erro', 'Não foi possível excluir o convite.');
+              Alert.alert(t('common.error'), t('hostMenu.deleteError'));
             } finally {
               setDeletingId(null);
             }
@@ -115,10 +117,10 @@ export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props)
         <View style={s.header}>
           {selectedEvent ? (
             <TouchableOpacity onPress={() => setSelectedEvent(null)} style={s.backBtn}>
-              <Text style={s.backTxt}>← VOLTAR</Text>
+              <Text style={s.backTxt}>{t('common.back')}</Text>
             </TouchableOpacity>
           ) : (
-            <Text style={s.headerTitle}>MEUS CONVITES</Text>
+            <Text style={s.headerTitle}>{t('hostMenu.title')}</Text>
           )}
           <TouchableOpacity onPress={onClose} style={s.closeBtn}>
             <Text style={s.closeTxt}>✕</Text>
@@ -133,7 +135,7 @@ export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props)
             </Text>
             <View style={s.eventActions}>
               <TouchableOpacity style={s.editBtn} onPress={() => handleEdit(selectedEvent)}>
-                <Text style={s.editTxt}>✎ EDITAR</Text>
+                <Text style={s.editTxt}>{t('hostMenu.editBtn')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={s.deleteBtn}
@@ -142,7 +144,7 @@ export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props)
               >
                 {deletingId === selectedEvent.id
                   ? <ActivityIndicator color="#ef4444" size="small" />
-                  : <Text style={s.deleteTxt}>⌫ EXCLUIR</Text>
+                  : <Text style={s.deleteTxt}>{t('hostMenu.deleteBtn')}</Text>
                 }
               </TouchableOpacity>
             </View>
@@ -155,7 +157,7 @@ export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props)
             loadingEvents ? (
               <ActivityIndicator color="#00dcff" style={{ marginTop: 40 }} />
             ) : events.length === 0 ? (
-              <Text style={s.emptyTxt}>Nenhum convite criado ainda.</Text>
+              <Text style={s.emptyTxt}>{t('hostMenu.empty')}</Text>
             ) : (
               events.map(ev => (
                 <View key={ev.id} style={s.eventCard}>
@@ -172,7 +174,7 @@ export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props)
                   </TouchableOpacity>
                   <View style={s.cardActions}>
                     <TouchableOpacity style={s.cardEditBtn} onPress={() => handleEdit(ev)}>
-                      <Text style={s.cardEditTxt}>✎ Editar</Text>
+                      <Text style={s.cardEditTxt}>{t('common.edit')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={s.cardDeleteBtn}
@@ -181,7 +183,7 @@ export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props)
                     >
                       {deletingId === ev.id
                         ? <ActivityIndicator color="#ef4444" size="small" />
-                        : <Text style={s.cardDeleteTxt}>Excluir</Text>
+                        : <Text style={s.cardDeleteTxt}>{t('common.delete')}</Text>
                       }
                     </TouchableOpacity>
                   </View>
@@ -192,12 +194,12 @@ export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props)
             loadingRsvps ? (
               <ActivityIndicator color="#00dcff" style={{ marginTop: 40 }} />
             ) : rsvps.length === 0 ? (
-              <Text style={s.emptyTxt}>Nenhuma confirmação ainda.</Text>
+              <Text style={s.emptyTxt}>{t('hostMenu.noRsvps')}</Text>
             ) : (
               <>
                 <View style={s.rsvpSummary}>
                   <Text style={s.rsvpSummaryNum}>{totalPeople(rsvps)}</Text>
-                  <Text style={s.rsvpSummaryLbl}>PESSOAS CONFIRMADAS</Text>
+                  <Text style={s.rsvpSummaryLbl}>{t('hostMenu.confirmed')}</Text>
                 </View>
                 {rsvps.map(r => (
                   <View key={r.id} style={s.rsvpCard}>
@@ -219,7 +221,7 @@ export default function HostMenu({ visible, onClose, onSignOut, onEdit }: Props)
 
         {/* Rodapé */}
         <TouchableOpacity style={s.signOutBtn} onPress={onSignOut}>
-          <Text style={s.signOutTxt}>SAIR DA CONTA</Text>
+          <Text style={s.signOutTxt}>{t('hostMenu.signOut')}</Text>
         </TouchableOpacity>
       </Animated.View>
     </Modal>

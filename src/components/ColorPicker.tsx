@@ -4,6 +4,7 @@ import {
   SafeAreaView, TouchableWithoutFeedback,
 } from 'react-native';
 import WheelColorPicker from 'react-native-wheel-color-picker';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   label: string;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function ColorPicker({ label, value, aiMode, onChangeColor, onToggleAi }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [temp, setTemp] = useState(value);
 
@@ -28,14 +30,14 @@ export default function ColorPicker({ label, value, aiMode, onChangeColor, onTog
           onPress={() => onToggleAi(!aiMode)}
         >
           <Text style={[s.aiTxt, aiMode && s.aiTxtActive]}>
-            {aiMode ? '✦ IA escolhe!' : '✦ Deixar com a IA'}
+            {aiMode ? t('colorPicker.aiChoose') : t('colorPicker.aiLeave')}
           </Text>
         </TouchableOpacity>
       </View>
 
       {aiMode ? (
         <View style={s.aiPlaceholder}>
-          <Text style={s.aiPlaceholderTxt}>A IA vai definir essa cor automaticamente</Text>
+          <Text style={s.aiPlaceholderTxt}>{t('colorPicker.aiHint')}</Text>
         </View>
       ) : (
         <TouchableOpacity
@@ -45,7 +47,7 @@ export default function ColorPicker({ label, value, aiMode, onChangeColor, onTog
         >
           <View style={[s.swatch, { backgroundColor: value }]} />
           <Text style={s.hexTxt}>{value}</Text>
-          <Text style={s.editTxt}>toque para editar →</Text>
+          <Text style={s.editTxt}>{t('colorPicker.tapEdit')}</Text>
         </TouchableOpacity>
       )}
 
@@ -71,7 +73,7 @@ export default function ColorPicker({ label, value, aiMode, onChangeColor, onTog
               <View style={[s.preview, { backgroundColor: temp }]} />
               <Text style={s.hex}>{temp}</Text>
               <TouchableOpacity style={s.btn} onPress={confirm}>
-                <Text style={s.btnTxt}>CONFIRMAR</Text>
+                <Text style={s.btnTxt}>{t('colorPicker.confirm')}</Text>
               </TouchableOpacity>
             </View>
           </SafeAreaView>

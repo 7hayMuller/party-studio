@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { VideoView, useVideoPlayer } from 'expo-video';
+import { useTranslation } from 'react-i18next';
 import { AppTheme, EventConfig } from '../config/theme';
 import PartyTicketAi from '../components/PartyTicketAi';
 import FooterBrand from '../components/FooterBrand';
@@ -113,14 +114,15 @@ export default function ConfirmScreen({ theme, event, name, guests, onReset, sho
     setTicketVisible(v => !v);
   };
 
+  const { t } = useTranslation();
   const dotColors = [theme.a1, theme.a2, '#fff', '#ffd700'];
   const code = useRef(`RSV${Math.floor(1000 + Math.random() * 9000)}`).current;
 
   const gridItems = [
-    { val: event.date,           lbl: 'DATA',       c: theme.a1 },
-    { val: String(guests + 1),   lbl: 'PESSOAS',    c: theme.a2 },
-    { val: event.time,           lbl: 'HORA',       c: theme.a1 },
-    { val: event.dressCode || code, lbl: 'DRESS CODE', c: theme.a2 },
+    { val: event.date,              lbl: t('confirm.date'),      c: theme.a1 },
+    { val: String(guests + 1),      lbl: t('confirm.people'),    c: theme.a2 },
+    { val: event.time,              lbl: t('confirm.time'),      c: theme.a1 },
+    { val: event.dressCode || code, lbl: t('confirm.dressCode'), c: theme.a2 },
   ];
 
   return (
@@ -198,7 +200,7 @@ export default function ConfirmScreen({ theme, event, name, guests, onReset, sho
           {event.videoUri ? (
             <TouchableOpacity style={[s.toggleBtn, { borderColor: theme.a1 + '55' }]} onPress={toggleTicket}>
               <Text style={[s.toggleTxt, { color: theme.a1 }]}>
-                {ticketVisible ? '▼ ESCONDER TICKET' : '▲ VER TICKET'}
+                {ticketVisible ? t('confirm.hideTicket') : t('confirm.showTicket')}
               </Text>
             </TouchableOpacity>
           ) : null}

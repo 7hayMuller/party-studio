@@ -3,6 +3,7 @@ import {
   Animated, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { AppTheme, EventConfig } from '../config/theme';
 
 interface Props { theme: AppTheme; event: EventConfig; name: string }
@@ -62,6 +63,7 @@ const f = StyleSheet.create({
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function PartyTicketAi({ theme, event, name }: Props) {
+  const { t } = useTranslation();
   const { width: screenW } = useWindowDimensions();
   const containerW = Math.min(screenW, 390);
   const ticketW    = containerW * 0.88;
@@ -185,7 +187,7 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
               </Text>
 
               {/* Hint */}
-              <Text style={s.hint}>toque para ver os detalhes  ↩</Text>
+              <Text style={s.hint}>{t('ticket.tapHint')}</Text>
             </View>
 
             {/* Picote */}
@@ -194,11 +196,11 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
             {/* Stub inferior */}
             <View style={[s.stub, { height: stubH }]}>
               <View>
-                <Text style={s.stubLabel}>DATA & HORA</Text>
+                <Text style={s.stubLabel}>{t('ticket.dateTime')}</Text>
                 <Text style={[s.stubVal, { color: '#fff' }]}>{event.date}  ·  {event.time}</Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={s.stubLabel}>TICKET</Text>
+                <Text style={s.stubLabel}>{t('ticket.ticket')}</Text>
                 <Text style={[s.stubVal, { color: theme.a1 }]}>{ticketCode}</Text>
               </View>
             </View>
@@ -230,7 +232,7 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
                   <Text style={[s.eyebrow, { color: theme.a2 + 'cc', marginBottom: 2 }]}>{theme.eyebrow}</Text>
                   <Text style={[s.backTitle, { color: '#fff' }]} numberOfLines={2}>{displayTitle}</Text>
                 </View>
-                <Text style={[s.passTag, { color: theme.a2, borderColor: theme.a2 + '55' }]}>CONVITE</Text>
+                <Text style={[s.passTag, { color: theme.a2, borderColor: theme.a2 + '55' }]}>{t('ticket.invite')}</Text>
               </View>
 
               {/* Linha */}
@@ -242,16 +244,16 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
 
               {/* Campos em grid 2×2 */}
               <View style={s.fieldsGrid}>
-                <Field label="DATA"   value={event.date}     color={theme.a1} />
-                <Field label="HORA"   value={event.time}     color={theme.a1} />
-                <Field label="LOCAL"  value={event.location} color="#fff" />
-                <Field label="DRESS CODE" value={event.dressCode || '—'} color={theme.a2} />
+                <Field label={t('ticket.date')}      value={event.date}              color={theme.a2} />
+                <Field label={t('ticket.time')}      value={event.time}              color={theme.a2} />
+                <Field label={t('ticket.location')}  value={event.location}          color={theme.a2} />
+                <Field label={t('ticket.dressCode')} value={event.dressCode || '—'}  color={theme.a2} />
               </View>
 
               {/* Convidado */}
               {name ? (
                 <View style={s.guestBlock}>
-                  <Text style={s.stubLabel}>CONVIDADO</Text>
+                  <Text style={s.stubLabel}>{t('ticket.guest')}</Text>
                   <Text style={[s.guestName, { color: '#fff' }]}>{name.toUpperCase()}</Text>
                 </View>
               ) : null}

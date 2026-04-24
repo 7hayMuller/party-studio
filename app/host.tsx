@@ -25,6 +25,7 @@ import { EVENT_CONFIG, EventConfig } from "../src/config/theme";
 import { ThemeInput, publishEvent, updateEvent, loadEvent } from "../src/services/ai";
 import { uploadMediaFile } from "../src/services/storage";
 import { HostPanelInitialValues } from "../src/screens/HostPanel";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../src/context/AuthContext";
 import { getAccessToken, signOut } from "../src/services/auth";
 import { useBackgroundAudio } from "../src/hooks/useBackgroundAudio";
@@ -46,6 +47,7 @@ export default function Host() {
 }
 
 function HostContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { theme, loading, source, generate } = useTheme();
   const [event, setEvent] = useState<EventConfig>(EVENT_CONFIG);
@@ -99,11 +101,11 @@ function HostContent() {
   const handleEditEvent = async (ev: any) => {
     try {
       const data = await loadEvent(ev.id);
-      const t = data.theme as any;
+      const td = data.theme as any;
       const e = data.event as any;
       setPanelInitialValues({
-        a1: t?.a1, a2: t?.a2, bg: t?.bg,
-        partyTitle: t?.partyTitle, description: t?.description,
+        a1: td?.a1, a2: td?.a2, bg: td?.bg,
+        partyTitle: td?.partyTitle, description: td?.description,
         name: e?.name, date: e?.date, time: e?.time,
         location: e?.location, email: e?.hostEmail,
         dressCode: e?.dressCode, musicUri: e?.musicUri,
@@ -113,7 +115,7 @@ function HostContent() {
       setRegenCount(0);
       setScreen("editing");
     } catch {
-      Alert.alert("Erro", "Não foi possível carregar o convite para edição.");
+      Alert.alert(t('common.error'), t('host.editLoadError'));
     }
   };
 
@@ -154,11 +156,11 @@ function HostContent() {
       setShareModal({ eventId, url });
     } catch (e: any) {
       console.error("[publicar] erro:", e?.message, e);
-      const msg = e?.message ?? "Tente novamente.";
+      const msg = e?.message ?? t('host.publishError');
       if (Platform.OS === "web") {
-        window.alert("Erro ao publicar: " + msg);
+        window.alert(t('host.publishError') + ": " + msg);
       } else {
-        Alert.alert("Erro ao publicar", msg);
+        Alert.alert(t('host.publishError'), msg);
       }
     } finally {
       setPublishing(false);
@@ -168,7 +170,7 @@ function HostContent() {
   const handleShare = async () => {
     if (!shareModal) return;
     const eventName = event.name || "Evento";
-    const message = `🎉 Você foi convidado para ${eventName}!\n\n${shareModal.url}`;
+    const message = t('host.shareMessage', { name: eventName, url: shareModal.url });
 
     if (Platform.OS === "web") {
       if (typeof navigator !== "undefined" && (navigator as any).share) {
@@ -179,10 +181,7 @@ function HostContent() {
         });
       } else {
         await (navigator as any).clipboard.writeText(shareModal.url);
-        Alert.alert(
-          "Link copiado!",
-          "O link foi copiado para a área de transferência.",
-        );
+        Alert.alert(t('host.linkCopied'), t('host.linkCopiedBody'));
       }
     } else {
       await Share.share({ message, url: shareModal.url });
@@ -227,7 +226,7 @@ function HostContent() {
 
           <View style={s.previewBar}>
             <View style={s.previewTag}>
-              <Text style={s.previewTagTxt}>PREVIEW DO HOST</Text>
+              <Text style={s.previewTagTxt}>{t('host.previewTag')}</Text>
             </View>
             <View style={s.previewActions}>
               <TouchableOpacity
@@ -236,14 +235,16 @@ function HostContent() {
                 disabled={loading}
               >
                 <Text style={s.regenTxt}>
-                  {loading ? "..." : regenCount >= FREE_REGENS ? "↺ REGENERAR 🔒" : `↺ REGENERAR (${FREE_REGENS - regenCount} restante${FREE_REGENS - regenCount !== 1 ? 's' : ''})`}
+                  {loading ? "..." : regenCount >= FREE_REGENS
+                    ? t('host.regenerateLocked')
+                    : t('host.regenerate', { count: FREE_REGENS - regenCount })}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.previewBtn, s.simulateBtn]}
                 onPress={() => setScreen("intro")}
               >
-                <Text style={s.simulateTxt}>▶ SIMULAR</Text>
+                <Text style={s.simulateTxt}>{t('host.simulate')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.previewBtn, s.publishBtn]}
@@ -253,7 +254,7 @@ function HostContent() {
                 {publishing ? (
                   <ActivityIndicator color="#000" size="small" />
                 ) : (
-                  <Text style={s.publishTxt}>✓ PUBLICAR</Text>
+                  <Text style={s.publishTxt}>{t('host.publish')}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -294,14 +295,14 @@ function HostContent() {
           {/* Barra de simulação */}
           <View style={s.simBar}>
             <View style={s.previewTag}>
-              <Text style={s.previewTagTxt}>SIMULANDO</Text>
+              <Text style={s.previewTagTxt}>{t('host.simulatingTag')}</Text>
             </View>
             <View style={s.previewActions}>
               <TouchableOpacity
                 style={[s.previewBtn, s.regenBtn]}
                 onPress={() => setScreen("editing")}
               >
-                <Text style={s.regenTxt}>← EDITAR</Text>
+                <Text style={s.regenTxt}>{t('host.backToEdit')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.previewBtn, s.publishBtn]}
@@ -311,7 +312,7 @@ function HostContent() {
                 {publishing ? (
                   <ActivityIndicator color="#000" size="small" />
                 ) : (
-                  <Text style={s.publishTxt}>✓ PUBLICAR</Text>
+                  <Text style={s.publishTxt}>{t('host.publish')}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -334,16 +335,13 @@ function HostContent() {
         <Pressable style={s.overlay} onPress={() => setPaywallVisible(false)}>
           <Pressable style={s.modal} onPress={e => e.stopPropagation()}>
             <Text style={s.paywallIcon}>✦</Text>
-            <Text style={s.modalTitle}>Regenerações esgotadas</Text>
-            <Text style={s.paywallSub}>
-              Você usou suas {FREE_REGENS} regenerações gratuitas.{"\n"}
-              Compre créditos para continuar ajustando este convite.
-            </Text>
+            <Text style={s.modalTitle}>{t('host.paywallTitle')}</Text>
+            <Text style={s.paywallSub}>{t('host.paywallBody', { count: FREE_REGENS })}</Text>
             <View style={s.paywallBadge}>
-              <Text style={s.paywallBadgeTxt}>EM BREVE · PACOTE DE CRÉDITOS</Text>
+              <Text style={s.paywallBadgeTxt}>{t('host.paywallBadge')}</Text>
             </View>
             <TouchableOpacity style={s.paywallClose} onPress={() => setPaywallVisible(false)}>
-              <Text style={s.paywallCloseTxt}>Fechar</Text>
+              <Text style={s.paywallCloseTxt}>{t('common.close')}</Text>
             </TouchableOpacity>
           </Pressable>
         </Pressable>
@@ -365,17 +363,17 @@ function HostContent() {
                 style={s.logoImg}
                 resizeMode="contain"
               />
-              <Text style={s.modalTitle}>Vamos bailar!</Text>
-              <Text style={s.modalSub}>Compartilhe com seus convidados</Text>
+              <Text style={s.modalTitle}>{t('host.shareTitle')}</Text>
+              <Text style={s.modalSub}>{t('host.shareSubtitle')}</Text>
             </View>
 
             <View style={s.codeBox}>
-              <Text style={s.codeLabel}>CÓDIGO DO EVENTO</Text>
+              <Text style={s.codeLabel}>{t('host.eventCode')}</Text>
               <Text style={s.code}>{shareModal?.eventId}</Text>
             </View>
 
             <TouchableOpacity style={s.shareBtn} onPress={handleShare}>
-              <Text style={s.shareBtnTxt}>↗ COMPARTILHAR LINK</Text>
+              <Text style={s.shareBtnTxt}>{t('host.shareBtn')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -385,7 +383,7 @@ function HostContent() {
                 router.push("/guest");
               }}
             >
-              <Text style={s.guestBtnTxt}>Ver como convidado</Text>
+              <Text style={s.guestBtnTxt}>{t('host.viewAsGuest')}</Text>
             </TouchableOpacity>
           </Pressable>
         </Pressable>

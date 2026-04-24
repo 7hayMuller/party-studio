@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import IntroScreen from '../src/screens/IntroScreen';
@@ -13,6 +14,7 @@ import { useBackgroundAudio } from '../src/hooks/useBackgroundAudio';
 type S = 'loading' | 'intro' | 'form' | 'confirm' | 'error';
 
 export default function Guest() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
 
   const [screen, setScreen]   = useState<S>('loading');
@@ -77,8 +79,8 @@ export default function Guest() {
   if (screen === 'error') {
     return (
       <View style={s.center}>
-        <Text style={s.errTxt}>Convite não encontrado.</Text>
-        <Text style={s.errSub}>Peça um novo link ao organizador.</Text>
+        <Text style={s.errTxt}>{t('guest.notFound')}</Text>
+        <Text style={s.errSub}>{t('guest.askNewLink')}</Text>
       </View>
     );
   }

@@ -4,6 +4,7 @@ import {
   Animated as RNAnimated, Image, ActivityIndicator, StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import FooterBrand from '../components/FooterBrand';
 import { AppTheme, EventConfig } from '../config/theme';
 
@@ -77,6 +78,7 @@ function MusicBar({ color }: { color: string }) {
 }
 
 export default function IntroScreen({ theme, event, onNext, musicPlaying }: Props) {
+  const { t } = useTranslation();
   const fade    = useRef(new RNAnimated.Value(0)).current;
   const slideUp = useRef(new RNAnimated.Value(30)).current;
   const glow    = useRef(new RNAnimated.Value(0.6)).current;
@@ -108,7 +110,7 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying }: Prop
           {!imgLoaded && (
             <View style={[s.imgLoader, { backgroundColor: theme.bg }]}>
               <ActivityIndicator color={theme.a1} size="large" />
-              <Text style={[s.imgLoadTxt, { color: theme.a1 + '99' }]}>gerando imagem…</Text>
+              <Text style={[s.imgLoadTxt, { color: theme.a1 + '99' }]}>{t('intro.generatingImage')}</Text>
             </View>
           )}
           <Image
