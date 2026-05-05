@@ -13,6 +13,8 @@ interface Props {
   event: EventConfig;
   onNext: () => void;
   musicPlaying?: boolean;
+  hasMusicUri?: boolean;
+  onPlayMusic?: () => void;
 }
 
 function AnimatedTitle({ text, color }: { text: string; color: string }) {
@@ -39,9 +41,7 @@ function AnimatedTitle({ text, color }: { text: string; color: string }) {
             {
               opacity: anims[i],
               transform: [{
-                translateY: anims[i].interpolate({
-                  inputRange: [0, 1], outputRange: [18, 0],
-                }),
+                translateY: anims[i].interpolate({ inputRange: [0, 1], outputRange: [18, 0] }),
               }],
             },
           ]}
@@ -71,16 +71,82 @@ function MusicBar({ color }: { color: string }) {
   return (
     <View style={waveRow}>
       {bars.map((b, i) => (
-        <RNAnimated.View
-          key={i}
-          style={[waveBar, { backgroundColor: color, transform: [{ scaleY: b }] }]}
-        />
+        <RNAnimated.View key={i} style={[waveBar, { backgroundColor: color, transform: [{ scaleY: b }] }]} />
       ))}
     </View>
   );
 }
 
-export default function IntroScreen({ theme, event, onNext, musicPlaying }: Props) {
+// Badge recolhível: mostra ♪ ou waveform, expande para mostrar botão de play
+function MusicControl({ playing, hasMusicUri, color, bg, onPlay }: {
+  playing: boolean;
+  hasMusicUri: boolean;
+  color: string;
+  bg: string;
+  onPlay: () => void;
+}) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const expandAnim = useRef(new RNAnimated.Value(0)).current;
+
+  // Auto-expande ao montar se música ainda não tocou
+  useEffect(() => {
+    if (hasMusicUri && !playing) {
+      RNAnimated.spring(expandAnim, { toValue: 1, useNativeDriver: false, tension: 60, friction: 10 }).start();
+      setExpanded(true);
+    }
+  }, []);
+
+  // Quando a música começa, recolhe automaticamente
+  useEffect(() => {
+    if (playing && expanded) {
+      RNAnimated.spring(expandAnim, { toValue: 0, useNativeDriver: false, tension: 80, friction: 10 }).start();
+      setExpanded(false);
+    }
+  }, [playing]);
+
+  const handleToggle = () => {
+    const next = !expanded;
+    RNAnimated.spring(expandAnim, { toValue: next ? 1 : 0, useNativeDriver: false, tension: 60, friction: 10 }).start();
+    setExpanded(next);
+  };
+
+  const expandedW = expandAnim.interpolate({ inputRange: [0, 1], outputRange: [0, playing ? 0 : 110] });
+  const expandedOpacity = expandAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 0, 1] });
+
+  if (!hasMusicUri && !playing) return null;
+
+  return (
+    <TouchableOpacity
+      style={[s.musicBadge, { backgroundColor: 'rgba(0,0,0,0.55)', borderColor: color + '44' }]}
+      onPress={handleToggle}
+      activeOpacity={0.8}
+    >
+      {/* Ícone ou waveform */}
+      {playing
+        ? <MusicBar color={color} />
+        : <Text style={[s.musicNote, { color }]}>♪</Text>
+      }
+
+      {/* Botão expansível de play — só aparece quando não está tocando */}
+      {!playing && (
+        <RNAnimated.View style={{ width: expandedW, overflow: 'hidden' }}>
+          <RNAnimated.View style={{ opacity: expandedOpacity }}>
+            <TouchableOpacity
+              style={[s.playBtn, { backgroundColor: color }]}
+              onPress={onPlay}
+              activeOpacity={0.85}
+            >
+              <Text style={[s.playBtnTxt, { color: bg }]}>{t('intro.enableMusicConfirm')}</Text>
+            </TouchableOpacity>
+          </RNAnimated.View>
+        </RNAnimated.View>
+      )}
+    </TouchableOpacity>
+  );
+}
+
+export default function IntroScreen({ theme, event, onNext, musicPlaying, hasMusicUri, onPlayMusic }: Props) {
   const { t } = useTranslation();
   const fade    = useRef(new RNAnimated.Value(0)).current;
   const slideUp = useRef(new RNAnimated.Value(30)).current;
@@ -102,6 +168,7 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying }: Prop
 
   const displayTitle = theme.partyTitle || `${theme.titleMain} ${theme.titleEm}`;
   const displayDesc  = theme.description || theme.tagline;
+  const showMusicControl = !!(hasMusicUri || musicPlaying);
 
   return (
     <View style={[s.container, { backgroundColor: theme.bg }]}>
@@ -136,10 +203,16 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying }: Prop
         style={StyleSheet.absoluteFill}
       />
 
-      {musicPlaying && (
-        <View style={s.musicBadge}>
-          <MusicBar color={theme.a1} />
-          <Text style={[s.musicTxt, { color: theme.a1 + 'cc' }]}>♪</Text>
+      {/* Controle de música recolhível */}
+      {showMusicControl && (
+        <View style={s.musicControlWrap}>
+          <MusicControl
+            playing={!!musicPlaying}
+            hasMusicUri={!!hasMusicUri}
+            color={theme.a1}
+            bg={theme.bg}
+            onPlay={onPlayMusic ?? (() => {})}
+          />
         </View>
       )}
 
@@ -188,13 +261,24 @@ const s = StyleSheet.create({
   imgLoader:  { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', gap: 12 },
   imgLoadTxt: { fontSize: 11, letterSpacing: 3, marginTop: 8 },
 
-  musicBadge: {
-    position: 'absolute', top: 52, right: 20,
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(0,0,0,0.45)', borderRadius: 20,
-    paddingHorizontal: 10, paddingVertical: 5,
+  musicControlWrap: {
+    position: 'absolute',
+    top: 52,
+    right: 20,
+    zIndex: 10,
   },
-  musicTxt: { fontSize: 13 },
+  musicBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 24,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  musicNote: { fontSize: 16, lineHeight: 18 },
+  playBtn:   { borderRadius: 16, paddingHorizontal: 12, paddingVertical: 5, marginLeft: 2 },
+  playBtnTxt: { fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
 
   content: {
     flex: 1, justifyContent: 'flex-end',

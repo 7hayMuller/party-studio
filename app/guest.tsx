@@ -23,19 +23,20 @@ export default function Guest() {
   const [eventId, setEventId] = useState<string | null>(null);
   const [name, setName]       = useState('');
   const [guests, setGuests]   = useState(0);
-
-  const [musicUnlocked, setMusicUnlocked] = useState(false);
   const [musicModalOpen, setMusicModalOpen] = useState(false);
 
-  const active = screen !== 'loading' && screen !== 'error';
-  const { playing: musicPlaying } = useBackgroundAudio(musicUnlocked ? ((event as any).musicUri ?? '') : '');
+  const active    = screen !== 'loading' && screen !== 'error';
+  const musicUri  = (event as any).musicUri ?? '';
 
-  // Abre o modal assim que a tela de intro é exibida e há música
+  // Hook sempre recebe a URI — play() só é chamado via unlock()
+  const { playing: musicPlaying, unlock: audioUnlock } = useBackgroundAudio(musicUri);
+
+  // Abre modal assim que a tela de intro exibida e há música
   useEffect(() => {
-    if (screen === 'intro' && !!(event as any).musicUri && !musicUnlocked) {
+    if (screen === 'intro' && musicUri && !musicPlaying) {
       setMusicModalOpen(true);
     }
-  }, [screen, event]);
+  }, [screen, musicUri, musicPlaying]);
 
   useEffect(() => {
     (async () => {
@@ -66,8 +67,9 @@ export default function Guest() {
     })();
   }, [id]);
 
+  // Chamado direto no onPress — preserva contexto de gesto do iOS Safari
   const handleUnlockAudio = () => {
-    setMusicUnlocked(true);
+    audioUnlock();
     setMusicModalOpen(false);
   };
 
@@ -108,6 +110,8 @@ export default function Guest() {
           event={event}
           onNext={() => setScreen('form')}
           musicPlaying={musicPlaying || !!event.youtubeVideoId}
+          hasMusicUri={!!musicUri}
+          onPlayMusic={handleUnlockAudio}
         />
       )}
       {screen === 'form' && (

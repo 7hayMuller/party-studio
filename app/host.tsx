@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -75,7 +75,14 @@ function HostContent() {
 
   // Áudio persiste durante preview e simulação
   const simulating = screen === 'preview' || screen === 'intro' || screen === 'form' || screen === 'confirm';
-  const { playing: musicPlaying } = useBackgroundAudio(simulating ? ((event as any).musicUri ?? '') : '');
+  const { playing: musicPlaying, unlock: audioUnlock } = useBackgroundAudio(simulating ? ((event as any).musicUri ?? '') : '');
+
+  // Host usa o app nativo — pode destravar o áudio automaticamente sem gesto
+  useEffect(() => {
+    if (simulating && (event as any).musicUri && !musicPlaying) {
+      audioUnlock();
+    }
+  }, [simulating, (event as any).musicUri]);
 
   const handleGenerate = async (input: ThemeInput, ev: EventConfig) => {
     if (!editingEventId) setRegenCount(0);

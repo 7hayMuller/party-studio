@@ -19,7 +19,8 @@
       "Bash(xargs grep -l \"dressCodeImage\")",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\thaymuller\\\\Desktop\\\\party-studio\" -Directory)",
       "Bash(Select-Object -First 20)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(Remove-Item *)"
     ]
   }
 }
