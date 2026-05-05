@@ -155,8 +155,8 @@ export default function ConfirmScreen({ theme, event, name, guests, onReset, sho
             />
           )}
           <LinearGradient
-            colors={[theme.bg + 'bb', theme.bg + 'ee', theme.bg] as any}
-            locations={[0, 0.5, 1]}
+            colors={[theme.bg + '33', theme.bg + '99', theme.bg] as any}
+            locations={[0, 0.6, 1]}
             style={StyleSheet.absoluteFill}
           />
         </>
