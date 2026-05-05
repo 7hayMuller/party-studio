@@ -135,6 +135,7 @@ export default {
   },
   intro: {
     generatingImage: 'generating image…',
+    enableMusic: 'Play music',
   },
   ticket: {
     tapHint: 'tap to see details  ↩',

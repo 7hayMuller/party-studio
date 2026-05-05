@@ -8,7 +8,14 @@ import { useTranslation } from 'react-i18next';
 import FooterBrand from '../components/FooterBrand';
 import { AppTheme, EventConfig } from '../config/theme';
 
-interface Props { theme: AppTheme; event: EventConfig; onNext: () => void; musicPlaying?: boolean; }
+interface Props {
+  theme: AppTheme;
+  event: EventConfig;
+  onNext: () => void;
+  musicPlaying?: boolean;
+  needsMusicUnlock?: boolean;
+  onUnlockAudio?: () => void;
+}
 
 // Renders a title with each character fading+sliding in with stagger
 function AnimatedTitle({ text, color }: { text: string; color: string }) {
@@ -77,11 +84,12 @@ function MusicBar({ color }: { color: string }) {
   );
 }
 
-export default function IntroScreen({ theme, event, onNext, musicPlaying }: Props) {
+export default function IntroScreen({ theme, event, onNext, musicPlaying, needsMusicUnlock, onUnlockAudio }: Props) {
   const { t } = useTranslation();
-  const fade    = useRef(new RNAnimated.Value(0)).current;
-  const slideUp = useRef(new RNAnimated.Value(30)).current;
-  const glow    = useRef(new RNAnimated.Value(0.6)).current;
+  const fade      = useRef(new RNAnimated.Value(0)).current;
+  const slideUp   = useRef(new RNAnimated.Value(30)).current;
+  const glow      = useRef(new RNAnimated.Value(0.6)).current;
+  const popupFade = useRef(new RNAnimated.Value(0)).current;
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError]   = useState(false);
 
@@ -96,6 +104,14 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying }: Prop
       RNAnimated.timing(glow, { toValue: 0.4, duration: 2500, useNativeDriver: true }),
     ])).start();
   }, []);
+
+  useEffect(() => {
+    if (needsMusicUnlock) {
+      RNAnimated.timing(popupFade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+    } else {
+      RNAnimated.timing(popupFade, { toValue: 0, duration: 250, useNativeDriver: true }).start();
+    }
+  }, [needsMusicUnlock]);
 
   const displayTitle = theme.partyTitle || `${theme.titleMain} ${theme.titleEm}`;
   const displayDesc  = theme.description || theme.tagline;
@@ -141,6 +157,21 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying }: Prop
           <MusicBar color={theme.a1} />
           <Text style={[s.musicTxt, { color: theme.a1 + 'cc' }]}>♪</Text>
         </View>
+      )}
+
+      {/* POPUP DE DESBLOQUEIO DE MÚSICA */}
+      {needsMusicUnlock && (
+        <RNAnimated.View style={[s.musicPrompt, { opacity: popupFade }]}>
+          <TouchableOpacity
+            style={[s.musicPromptBtn, { borderColor: theme.a1 + '66' }]}
+            onPress={onUnlockAudio}
+            activeOpacity={0.75}
+          >
+            <Text style={[s.musicPromptIcon, { color: theme.a1 }]}>♪</Text>
+            <Text style={[s.musicPromptTxt, { color: '#fff' }]}>{t('intro.enableMusic')}</Text>
+            <Text style={[s.musicPromptArrow, { color: theme.a1 }]}>▸</Text>
+          </TouchableOpacity>
+        </RNAnimated.View>
       )}
 
       {/* CONTEÚDO */}
@@ -238,6 +269,27 @@ const s = StyleSheet.create({
     paddingVertical: 5,
   },
   musicTxt: { fontSize: 13 },
+
+  musicPrompt: {
+    position: 'absolute',
+    bottom: 160,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  musicPromptBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(0,0,0,0.72)',
+    borderWidth: 1,
+    borderRadius: 30,
+    paddingHorizontal: 20,
+    paddingVertical: 11,
+  },
+  musicPromptIcon:  { fontSize: 15 },
+  musicPromptTxt:   { fontSize: 12, fontWeight: '700', letterSpacing: 2 },
+  musicPromptArrow: { fontSize: 13, fontWeight: '900' },
 
   content: {
     flex: 1,

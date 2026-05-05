@@ -25,7 +25,7 @@ export default function Guest() {
   const [guests, setGuests]   = useState(0);
 
   const active = screen !== 'loading' && screen !== 'error';
-  const { playing: musicPlaying } = useBackgroundAudio(active ? (event.musicUri ?? '') : '');
+  const { playing: musicPlaying, needsUnlock: needsMusicUnlock, unlock: unlockAudio } = useBackgroundAudio(active ? (event.musicUri ?? '') : '');
 
   useEffect(() => {
     (async () => {
@@ -91,7 +91,14 @@ export default function Guest() {
       {active && <YouTubePlayer videoId={event.youtubeVideoId || ''} />}
 
       {screen === 'intro' && (
-        <IntroScreen theme={theme} event={event} onNext={() => setScreen('form')} musicPlaying={musicPlaying || !!event.youtubeVideoId} />
+        <IntroScreen
+          theme={theme}
+          event={event}
+          onNext={() => setScreen('form')}
+          musicPlaying={musicPlaying || !!event.youtubeVideoId}
+          needsMusicUnlock={needsMusicUnlock}
+          onUnlockAudio={unlockAudio}
+        />
       )}
       {screen === 'form' && (
         <FormScreen theme={theme} event={event} onConfirm={handleConfirm} />

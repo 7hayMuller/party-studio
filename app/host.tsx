@@ -75,7 +75,7 @@ function HostContent() {
 
   // Áudio persiste durante preview e simulação
   const simulating = screen === 'preview' || screen === 'intro' || screen === 'form' || screen === 'confirm';
-  const { playing: musicPlaying } = useBackgroundAudio(simulating ? ((event as any).musicUri ?? '') : '');
+  const { playing: musicPlaying, needsUnlock: needsMusicUnlock, unlock: unlockAudio } = useBackgroundAudio(simulating ? ((event as any).musicUri ?? '') : '');
 
   const handleGenerate = async (input: ThemeInput, ev: EventConfig) => {
     if (!editingEventId) setRegenCount(0);
@@ -225,6 +225,8 @@ function HostContent() {
             event={event}
             onNext={() => setScreen("intro")}
             musicPlaying={musicPlaying || !!event.youtubeVideoId}
+            needsMusicUnlock={needsMusicUnlock}
+            onUnlockAudio={unlockAudio}
           />
 
           <View style={s.previewBar}>

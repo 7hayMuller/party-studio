@@ -126,15 +126,7 @@ export type TicketResponse = {
   barcodeText: string;
 };
 
-export async function generateTicket(data: TicketRequest): Promise<TicketResponse> {
-  const res = await fetch('https://seu-backend.com/ticket', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Erro ao gerar ticket');
-  return res.json();
-}
+
 
 // ─── Event publishing & RSVP ──────────────────────────────────────────────────
 

@@ -20,6 +20,7 @@ const eventSchema = z.object({
     location: z.string().max(200).optional(),
     hostEmail: z.string().email().optional().or(z.literal('')),
     dressCode: z.string().max(100).optional(),
+    dressCodeImageUri: z.string().url().optional().nullable(),
     musicUri: z.string().optional().nullable(),
     videoUri: z.string().optional().nullable(),
     youtubeVideoId: z.string().max(20).optional().nullable(),
