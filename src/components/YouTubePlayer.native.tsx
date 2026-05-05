@@ -11,7 +11,7 @@ export default function YouTubePlayer({ videoId }: { videoId: string }) {
           <style>*{margin:0;padding:0;background:#000}html,body,iframe{width:100%;height:100%;border:none;overflow:hidden}</style>
         </head><body>
           <iframe
-            src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&playsinline=1&controls=0&mute=0&rel=0&enablejsapi=1"
+            src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&playsinline=1&controls=0&mute=1&rel=0&enablejsapi=1"
             allow="autoplay; fullscreen"
             frameborder="0"
             allowfullscreen

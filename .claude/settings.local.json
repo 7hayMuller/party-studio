@@ -16,7 +16,10 @@
       "Bash(echo \"EXIT: $?\")",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\thaymuller\\\\Desktop\\\\party-studio\" -Recurse -Filter \"*.tsx\" -ErrorAction SilentlyContinue)",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "Bash(xargs grep -l \"dressCodeImage\")"
+      "Bash(xargs grep -l \"dressCodeImage\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\thaymuller\\\\Desktop\\\\party-studio\" -Directory)",
+      "Bash(Select-Object -First 20)",
+      "WebSearch"
     ]
   }
 }
