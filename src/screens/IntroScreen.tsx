@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, Modal, Pressable,
+  View, Text, TouchableOpacity, StyleSheet,
   Animated as RNAnimated, Image, ActivityIndicator, StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,11 +13,8 @@ interface Props {
   event: EventConfig;
   onNext: () => void;
   musicPlaying?: boolean;
-  needsMusicUnlock?: boolean;
-  onUnlockAudio?: () => void;
 }
 
-// Renders a title with each character fading+sliding in with stagger
 function AnimatedTitle({ text, color }: { text: string; color: string }) {
   const chars = text.split('');
   const anims = useRef(chars.map(() => new RNAnimated.Value(0))).current;
@@ -56,7 +53,6 @@ function AnimatedTitle({ text, color }: { text: string; color: string }) {
   );
 }
 
-// Animated waveform bars shown while music plays
 function MusicBar({ color }: { color: string }) {
   const bars = useRef([0, 1, 2, 3].map(() => new RNAnimated.Value(0.3))).current;
 
@@ -84,14 +80,13 @@ function MusicBar({ color }: { color: string }) {
   );
 }
 
-export default function IntroScreen({ theme, event, onNext, musicPlaying, needsMusicUnlock, onUnlockAudio }: Props) {
+export default function IntroScreen({ theme, event, onNext, musicPlaying }: Props) {
   const { t } = useTranslation();
   const fade    = useRef(new RNAnimated.Value(0)).current;
   const slideUp = useRef(new RNAnimated.Value(30)).current;
   const glow    = useRef(new RNAnimated.Value(0.6)).current;
-  const [imgLoaded, setImgLoaded]       = useState(false);
-  const [imgError, setImgError]         = useState(false);
-  const [musicModalOpen, setMusicModalOpen] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError]   = useState(false);
 
   useEffect(() => {
     RNAnimated.parallel([
@@ -103,11 +98,6 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
       RNAnimated.timing(glow, { toValue: 1,   duration: 2500, useNativeDriver: true }),
       RNAnimated.timing(glow, { toValue: 0.4, duration: 2500, useNativeDriver: true }),
     ])).start();
-
-    if (needsMusicUnlock) {
-      const t = setTimeout(() => setMusicModalOpen(true), 800);
-      return () => clearTimeout(t);
-    }
   }, []);
 
   const displayTitle = theme.partyTitle || `${theme.titleMain} ${theme.titleEm}`;
@@ -117,7 +107,6 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
     <View style={[s.container, { backgroundColor: theme.bg }]}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-      {/* IMAGEM OU GRADIENTE DE FUNDO */}
       {theme.imageUrl && !imgError ? (
         <>
           {!imgLoaded && (
@@ -141,14 +130,12 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
         />
       )}
 
-      {/* GRADIENTE ESCURO SOBRE A IMAGEM */}
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.3)', theme.bg] as [string, string, string]}
         locations={[0, 0.4, 1]}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* INDICADOR DE MÚSICA */}
       {musicPlaying && (
         <View style={s.musicBadge}>
           <MusicBar color={theme.a1} />
@@ -156,34 +143,21 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
         </View>
       )}
 
-      {/* CONTEÚDO */}
       <RNAnimated.View style={[s.content, { opacity: fade, transform: [{ translateY: slideUp }] }]}>
-
-        {/* ICON + EYEBROW */}
-        {/* <View style={s.top}>
-          <Text style={s.icon}>{theme.icon}</Text>
-          <Text style={[s.eyebrow, { color: theme.a1 }]}>{theme.eyebrow}</Text>
-        </View> */}
-
-        {/* TÍTULO ANIMADO LETRA A LETRA */}
         <AnimatedTitle text={displayTitle} color="#fff" />
 
-        {/* NEON LINE */}
         <LinearGradient
           colors={['transparent', theme.a1, 'transparent'] as [string, string, string]}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
           style={s.neon}
         />
 
-        {/* DESCRIÇÃO */}
         <Text style={s.description}>{displayDesc}</Text>
 
-        {/* META */}
         <Text style={[s.meta, { color: theme.a1 + 'aa' }]}>
           {event.date}  ·  {event.time}  ·  {event.location}
         </Text>
 
-        {/* BOTÃO */}
         <RNAnimated.View style={{ opacity: glow, width: '100%' }}>
           <TouchableOpacity
             style={[s.btn, { backgroundColor: theme.a1 }]}
@@ -196,129 +170,42 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
 
         <FooterBrand color={theme.a1 + '55'} />
       </RNAnimated.View>
-
-      {/* MODAL DE MÚSICA */}
-      <Modal visible={musicModalOpen} transparent animationType="fade">
-        <Pressable style={s.overlay} onPress={() => setMusicModalOpen(false)}>
-          <Pressable style={s.musicModal} onPress={e => e.stopPropagation()}>
-            <Text style={[s.musicModalIcon, { color: theme.a1 }]}>♪</Text>
-            <Text style={s.musicModalTitle}>{t('intro.enableMusic')}</Text>
-            <Text style={s.musicModalSub}>{t('intro.enableMusicSub')}</Text>
-            <TouchableOpacity
-              style={[s.musicModalBtn, { backgroundColor: theme.a1 }]}
-              onPress={() => { setMusicModalOpen(false); onUnlockAudio?.(); }}
-              activeOpacity={0.85}
-            >
-              <Text style={[s.musicModalBtnTxt, { color: theme.bg }]}>{t('intro.enableMusicConfirm')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setMusicModalOpen(false)} style={{ marginTop: 12 }}>
-              <Text style={s.musicModalSkip}>{t('intro.enableMusicSkip')}</Text>
-            </TouchableOpacity>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </View>
   );
 }
 
-// Shared style objects for the animated title (defined outside component to avoid re-creation)
-const titleWrap: any = {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  marginBottom: 16,
-};
-
+const titleWrap: any = { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 };
 const titleChar: any = {
-  fontSize: 42,
-  fontWeight: '900',
-  lineHeight: 52,
-  textShadowColor: 'rgba(0,0,0,0.6)',
-  textShadowOffset: { width: 0, height: 2 },
-  textShadowRadius: 8,
+  fontSize: 42, fontWeight: '900', lineHeight: 52,
+  textShadowColor: 'rgba(0,0,0,0.6)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8,
 };
-
-const waveRow: any = {
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: 3,
-  height: 16,
-};
-
-const waveBar: any = {
-  width: 3,
-  height: 14,
-  borderRadius: 2,
-};
+const waveRow: any = { flexDirection: 'row', alignItems: 'center', gap: 3, height: 16 };
+const waveBar: any = { width: 3, height: 14, borderRadius: 2 };
 
 const s = StyleSheet.create({
-  container:   { flex: 1 },
-  bgImage:     { ...StyleSheet.absoluteFillObject },
-  imgLoader:   {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center', justifyContent: 'center', gap: 12,
-  },
-  imgLoadTxt:  { fontSize: 11, letterSpacing: 3, marginTop: 8 },
+  container:  { flex: 1 },
+  bgImage:    { ...StyleSheet.absoluteFillObject },
+  imgLoader:  { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', gap: 12 },
+  imgLoadTxt: { fontSize: 11, letterSpacing: 3, marginTop: 8 },
 
   musicBadge: {
-    position: 'absolute',
-    top: 52,
-    right: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    position: 'absolute', top: 52, right: 20,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: 'rgba(0,0,0,0.45)', borderRadius: 20,
+    paddingHorizontal: 10, paddingVertical: 5,
   },
   musicTxt: { fontSize: 13 },
 
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  musicModal: {
-    backgroundColor: '#141414',
-    borderRadius: 20,
-    padding: 28,
-    width: 300,
-    alignItems: 'center',
-  },
-  musicModalIcon:   { fontSize: 36, marginBottom: 12 },
-  musicModalTitle:  { fontSize: 16, fontWeight: '800', color: '#fff', letterSpacing: 1, marginBottom: 8 },
-  musicModalSub:    { fontSize: 13, color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginBottom: 24, lineHeight: 20 },
-  musicModalBtn:    { width: '100%', padding: 16, borderRadius: 12, alignItems: 'center' },
-  musicModalBtnTxt: { fontSize: 13, fontWeight: '800', letterSpacing: 2 },
-  musicModalSkip:   { fontSize: 12, color: 'rgba(255,255,255,0.3)', letterSpacing: 1 },
-
   content: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingHorizontal: 28,
-    paddingBottom: 56,
-    paddingTop: 80,
+    flex: 1, justifyContent: 'flex-end',
+    paddingHorizontal: 28, paddingBottom: 56, paddingTop: 80,
   },
-
-  top:        { marginBottom: 12 },
-  icon:       { fontSize: 48, marginBottom: 6 },
-  eyebrow:    { fontSize: 10, letterSpacing: 6 },
-
   neon:        { height: 1.5, marginBottom: 16 },
-
   description: {
-    fontSize: 15,
-    color: 'rgba(255,255,255,0.75)',
-    lineHeight: 24,
-    marginBottom: 20,
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    fontSize: 15, color: 'rgba(255,255,255,0.75)', lineHeight: 24, marginBottom: 20,
+    textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4,
   },
-
   meta:   { fontSize: 10, letterSpacing: 3, marginBottom: 24 },
-
   btn:    { width: '100%', padding: 18, borderRadius: 14, alignItems: 'center' },
   btnTxt: { fontSize: 13, fontWeight: '800', letterSpacing: 3 },
 });
