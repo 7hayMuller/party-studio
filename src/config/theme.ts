@@ -23,6 +23,7 @@ export const EVENT_CONFIG = {
   date: 'A DEFINIR',
   time: '00:00',
   dressCode: 'A definir',
+  dressCodeImageUri: '',
   location: 'A definir',
   hostEmail: '',
   musicUri: '',

@@ -108,7 +108,7 @@ function HostContent() {
         partyTitle: td?.partyTitle, description: td?.description,
         name: e?.name, date: e?.date, time: e?.time,
         location: e?.location, email: e?.hostEmail,
-        dressCode: e?.dressCode, musicUri: e?.musicUri,
+        dressCode: e?.dressCode, dressCodeImageUri: e?.dressCodeImageUri, musicUri: e?.musicUri,
         videoUri: e?.videoUri, youtubeVideoId: e?.youtubeVideoId,
       });
       setEditingEventId(ev.id);
@@ -130,6 +130,9 @@ function HostContent() {
       }
       if ((event as any).videoUri) {
         (publishEv as any).videoUri = await uploadMediaFile((event as any).videoUri, 'video');
+      }
+      if ((event as any).dressCodeImageUri && !(event as any).dressCodeImageUri.startsWith('http')) {
+        (publishEv as any).dressCodeImageUri = await uploadMediaFile((event as any).dressCodeImageUri, 'image');
       }
       if (theme.imageUrl && !theme.imageUrl.startsWith('http')) {
         publishTheme = { ...publishTheme, imageUrl: await uploadMediaFile(theme.imageUrl, 'image') };

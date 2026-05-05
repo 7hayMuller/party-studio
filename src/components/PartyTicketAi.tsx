@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Animated, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions,
+  Animated, Image, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
@@ -249,6 +249,14 @@ export default function PartyTicketAi({ theme, event, name }: Props) {
                 <Field label={t('ticket.location')}  value={event.location}          color={theme.a2} />
                 <Field label={t('ticket.dressCode')} value={event.dressCode || '—'}  color={theme.a2} />
               </View>
+
+              {/* Imagem de referência do dress code */}
+              {(event as any).dressCodeImageUri ? (
+                <Image
+                  source={{ uri: (event as any).dressCodeImageUri }}
+                  style={{ width: '100%', height: 100, borderRadius: 8, marginBottom: 16, resizeMode: 'cover' }}
+                />
+              ) : null}
 
               {/* Convidado */}
               {name ? (

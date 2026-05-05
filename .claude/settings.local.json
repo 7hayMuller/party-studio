@@ -13,7 +13,10 @@
       "Bash(kill %1)",
       "Bash(PORT=3001 node server.js)",
       "Bash(PORT=3001 timeout 5 node server.js)",
-      "Bash(echo \"EXIT: $?\")"
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\thaymuller\\\\Desktop\\\\party-studio\" -Recurse -Filter \"*.tsx\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(xargs grep -l \"dressCodeImage\")"
     ]
   }
 }

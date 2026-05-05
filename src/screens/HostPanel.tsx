@@ -39,6 +39,7 @@ export interface HostPanelInitialValues {
   location?: string;
   email?: string;
   dressCode?: string;
+  dressCodeImageUri?: string;
   musicUri?: string;
   videoUri?: string;
   youtubeVideoId?: string;
@@ -81,7 +82,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
   const [location, setLocation] = useState(initialValues?.location ?? '');
   const [email, setEmail]       = useState(initialValues?.email ?? '');
   const [dressCode, setDressCode] = useState(initialValues?.dressCode ?? '');
-  const [dressCodeImage, setDressCodeImage] = useState<string | null>(null);
+  const [dressCodeImage, setDressCodeImage] = useState<string | null>(initialValues?.dressCodeImageUri ?? null);
   const [musicUri, setMusicUri]         = useState(initialValues?.musicUri ?? '');
   const [videoUri, setVideoUri]         = useState(initialValues?.videoUri ?? '');
   const [musicTab, setMusicTab]         = useState<'file' | 'youtube'>(initialValues?.youtubeVideoId ? 'youtube' : 'file');
@@ -174,6 +175,7 @@ export default function HostPanel({ onGenerate, loading, source, initialValues, 
         location:  location || 'A definir',
         hostEmail: email,
         dressCode: dressCode || 'A definir',
+        dressCodeImageUri: dressCodeImage || '',
         musicUri: musicTab === 'file' ? musicUri : '',
         videoUri,
         youtubeVideoId: musicTab === 'youtube' ? youtubeVideoId : '',
