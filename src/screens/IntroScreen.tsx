@@ -159,21 +159,6 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
         </View>
       )}
 
-      {/* POPUP DE DESBLOQUEIO DE MÚSICA */}
-      {needsMusicUnlock && (
-        <RNAnimated.View style={[s.musicPrompt, { opacity: popupFade }]}>
-          <TouchableOpacity
-            style={[s.musicPromptBtn, { borderColor: theme.a1 + '66' }]}
-            onPress={onUnlockAudio}
-            activeOpacity={0.75}
-          >
-            <Text style={[s.musicPromptIcon, { color: theme.a1 }]}>♪</Text>
-            <Text style={[s.musicPromptTxt, { color: '#fff' }]}>{t('intro.enableMusic')}</Text>
-            <Text style={[s.musicPromptArrow, { color: theme.a1 }]}>▸</Text>
-          </TouchableOpacity>
-        </RNAnimated.View>
-      )}
-
       {/* CONTEÚDO */}
       <RNAnimated.View style={[s.content, { opacity: fade, transform: [{ translateY: slideUp }] }]}>
 
@@ -200,6 +185,21 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
         <Text style={[s.meta, { color: theme.a1 + 'aa' }]}>
           {event.date}  ·  {event.time}  ·  {event.location}
         </Text>
+
+        {/* POPUP DE DESBLOQUEIO DE MÚSICA */}
+        {needsMusicUnlock && (
+          <RNAnimated.View style={[s.musicPrompt, { opacity: popupFade }]}>
+            <TouchableOpacity
+              style={[s.musicPromptBtn, { borderColor: theme.a1 + '66' }]}
+              onPress={onUnlockAudio}
+              activeOpacity={0.75}
+            >
+              <Text style={[s.musicPromptIcon, { color: theme.a1 }]}>♪</Text>
+              <Text style={[s.musicPromptTxt, { color: '#fff' }]}>{t('intro.enableMusic')}</Text>
+              <Text style={[s.musicPromptArrow, { color: theme.a1 }]}>▸</Text>
+            </TouchableOpacity>
+          </RNAnimated.View>
+        )}
 
         {/* BOTÃO */}
         <RNAnimated.View style={{ opacity: glow, width: '100%' }}>
@@ -271,11 +271,8 @@ const s = StyleSheet.create({
   musicTxt: { fontSize: 13 },
 
   musicPrompt: {
-    position: 'absolute',
-    bottom: 160,
-    left: 0,
-    right: 0,
     alignItems: 'center',
+    marginBottom: 12,
   },
   musicPromptBtn: {
     flexDirection: 'row',

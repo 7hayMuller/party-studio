@@ -1,51 +1,28 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAudioPlayer, setAudioModeAsync } from 'expo-audio';
 
 export function useBackgroundAudio(musicUri: string) {
   const player = useAudioPlayer(musicUri ? { uri: musicUri } : undefined);
-  const [needsUnlock, setNeedsUnlock] = useState(false);
+  // Começa como true sempre que há música — o usuário precisa tocar para destravá-la
+  const [needsUnlock, setNeedsUnlock] = useState(!!musicUri);
 
+  // Atualiza quando a URI muda (ex: troca de evento)
   useEffect(() => {
-    if (!musicUri) {
-      player.pause();
-      setNeedsUnlock(false);
-      return;
-    }
+    setNeedsUnlock(!!musicUri);
+    if (!musicUri) player.pause();
+  }, [musicUri]);
 
-    let cancelled = false;
-
+  const unlock = useCallback(() => {
+    if (!musicUri) return;
     setAudioModeAsync({ playsInSilentMode: true })
-      .then(() => {
-        if (cancelled) return;
+      .catch(() => {})
+      .finally(() => {
         player.loop = true;
         player.volume = 0.75;
         player.play();
-      })
-      .catch(() => {
-        if (!cancelled) setNeedsUnlock(true);
+        setNeedsUnlock(false);
       });
-
-    // Fallback: se após 2s o player não estiver tocando, pede interação do usuário
-    const timer = setTimeout(() => {
-      if (!cancelled && !player.playing) {
-        setNeedsUnlock(true);
-      }
-    }, 2000);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-      player.pause();
-    };
-  }, [musicUri]);
-
-  const unlock = () => {
-    if (!musicUri) return;
-    player.loop = true;
-    player.volume = 0.75;
-    player.play();
-    setNeedsUnlock(false);
-  };
+  }, [musicUri, player]);
 
   return { playing: !!musicUri && !needsUnlock, needsUnlock, unlock };
 }
