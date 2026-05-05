@@ -25,7 +25,15 @@ export default function Guest() {
   const [guests, setGuests]   = useState(0);
 
   const active = screen !== 'loading' && screen !== 'error';
-  const { playing: musicPlaying, needsUnlock: needsMusicUnlock, unlock: unlockAudio } = useBackgroundAudio(active ? (event.musicUri ?? '') : '');
+
+  const [musicUnlocked, setMusicUnlocked] = useState(false);
+  const hasMusicUri = !!(event as any).musicUri;
+  const needsMusicUnlock = hasMusicUri && !musicUnlocked && screen === 'intro';
+
+  // Só passa a URI ao hook depois que o usuário destravou
+  const { playing: musicPlaying } = useBackgroundAudio(musicUnlocked ? ((event as any).musicUri ?? '') : '');
+
+  const handleUnlockAudio = () => setMusicUnlocked(true);
 
   useEffect(() => {
     (async () => {
@@ -97,7 +105,7 @@ export default function Guest() {
           onNext={() => setScreen('form')}
           musicPlaying={musicPlaying || !!event.youtubeVideoId}
           needsMusicUnlock={needsMusicUnlock}
-          onUnlockAudio={unlockAudio}
+          onUnlockAudio={handleUnlockAudio}
         />
       )}
       {screen === 'form' && (

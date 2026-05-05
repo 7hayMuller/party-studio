@@ -103,15 +103,12 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
       RNAnimated.timing(glow, { toValue: 1,   duration: 2500, useNativeDriver: true }),
       RNAnimated.timing(glow, { toValue: 0.4, duration: 2500, useNativeDriver: true }),
     ])).start();
-  }, []);
 
-  useEffect(() => {
+    // Anima o popup se já vier com música desde o início
     if (needsMusicUnlock) {
-      RNAnimated.timing(popupFade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-    } else {
-      RNAnimated.timing(popupFade, { toValue: 0, duration: 250, useNativeDriver: true }).start();
+      RNAnimated.timing(popupFade, { toValue: 1, duration: 500, delay: 800, useNativeDriver: true }).start();
     }
-  }, [needsMusicUnlock]);
+  }, []);
 
   const displayTitle = theme.partyTitle || `${theme.titleMain} ${theme.titleEm}`;
   const displayDesc  = theme.description || theme.tagline;
