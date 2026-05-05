@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet,
+  View, Text, TouchableOpacity, StyleSheet, Modal, Pressable,
   Animated as RNAnimated, Image, ActivityIndicator, StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -86,12 +86,12 @@ function MusicBar({ color }: { color: string }) {
 
 export default function IntroScreen({ theme, event, onNext, musicPlaying, needsMusicUnlock, onUnlockAudio }: Props) {
   const { t } = useTranslation();
-  const fade      = useRef(new RNAnimated.Value(0)).current;
-  const slideUp   = useRef(new RNAnimated.Value(30)).current;
-  const glow      = useRef(new RNAnimated.Value(0.6)).current;
-  const popupFade = useRef(new RNAnimated.Value(0)).current;
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError]   = useState(false);
+  const fade    = useRef(new RNAnimated.Value(0)).current;
+  const slideUp = useRef(new RNAnimated.Value(30)).current;
+  const glow    = useRef(new RNAnimated.Value(0.6)).current;
+  const [imgLoaded, setImgLoaded]       = useState(false);
+  const [imgError, setImgError]         = useState(false);
+  const [musicModalOpen, setMusicModalOpen] = useState(false);
 
   useEffect(() => {
     RNAnimated.parallel([
@@ -104,9 +104,9 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
       RNAnimated.timing(glow, { toValue: 0.4, duration: 2500, useNativeDriver: true }),
     ])).start();
 
-    // Anima o popup se já vier com música desde o início
     if (needsMusicUnlock) {
-      RNAnimated.timing(popupFade, { toValue: 1, duration: 500, delay: 800, useNativeDriver: true }).start();
+      const t = setTimeout(() => setMusicModalOpen(true), 800);
+      return () => clearTimeout(t);
     }
   }, []);
 
@@ -183,21 +183,6 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
           {event.date}  ·  {event.time}  ·  {event.location}
         </Text>
 
-        {/* POPUP DE DESBLOQUEIO DE MÚSICA */}
-        {needsMusicUnlock && (
-          <RNAnimated.View style={[s.musicPrompt, { opacity: popupFade }]}>
-            <TouchableOpacity
-              style={[s.musicPromptBtn, { borderColor: theme.a1 + '66' }]}
-              onPress={onUnlockAudio}
-              activeOpacity={0.75}
-            >
-              <Text style={[s.musicPromptIcon, { color: theme.a1 }]}>♪</Text>
-              <Text style={[s.musicPromptTxt, { color: '#fff' }]}>{t('intro.enableMusic')}</Text>
-              <Text style={[s.musicPromptArrow, { color: theme.a1 }]}>▸</Text>
-            </TouchableOpacity>
-          </RNAnimated.View>
-        )}
-
         {/* BOTÃO */}
         <RNAnimated.View style={{ opacity: glow, width: '100%' }}>
           <TouchableOpacity
@@ -211,6 +196,27 @@ export default function IntroScreen({ theme, event, onNext, musicPlaying, needsM
 
         <FooterBrand color={theme.a1 + '55'} />
       </RNAnimated.View>
+
+      {/* MODAL DE MÚSICA */}
+      <Modal visible={musicModalOpen} transparent animationType="fade">
+        <Pressable style={s.overlay} onPress={() => setMusicModalOpen(false)}>
+          <Pressable style={s.musicModal} onPress={e => e.stopPropagation()}>
+            <Text style={[s.musicModalIcon, { color: theme.a1 }]}>♪</Text>
+            <Text style={s.musicModalTitle}>{t('intro.enableMusic')}</Text>
+            <Text style={s.musicModalSub}>{t('intro.enableMusicSub')}</Text>
+            <TouchableOpacity
+              style={[s.musicModalBtn, { backgroundColor: theme.a1 }]}
+              onPress={() => { setMusicModalOpen(false); onUnlockAudio?.(); }}
+              activeOpacity={0.85}
+            >
+              <Text style={[s.musicModalBtnTxt, { color: theme.bg }]}>{t('intro.enableMusicConfirm')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setMusicModalOpen(false)} style={{ marginTop: 12 }}>
+              <Text style={s.musicModalSkip}>{t('intro.enableMusicSkip')}</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -267,23 +273,25 @@ const s = StyleSheet.create({
   },
   musicTxt: { fontSize: 13 },
 
-  musicPrompt: {
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
     alignItems: 'center',
-    marginBottom: 12,
+    justifyContent: 'center',
   },
-  musicPromptBtn: {
-    flexDirection: 'row',
+  musicModal: {
+    backgroundColor: '#141414',
+    borderRadius: 20,
+    padding: 28,
+    width: 300,
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(0,0,0,0.72)',
-    borderWidth: 1,
-    borderRadius: 30,
-    paddingHorizontal: 20,
-    paddingVertical: 11,
   },
-  musicPromptIcon:  { fontSize: 15 },
-  musicPromptTxt:   { fontSize: 12, fontWeight: '700', letterSpacing: 2 },
-  musicPromptArrow: { fontSize: 13, fontWeight: '900' },
+  musicModalIcon:   { fontSize: 36, marginBottom: 12 },
+  musicModalTitle:  { fontSize: 16, fontWeight: '800', color: '#fff', letterSpacing: 1, marginBottom: 8 },
+  musicModalSub:    { fontSize: 13, color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginBottom: 24, lineHeight: 20 },
+  musicModalBtn:    { width: '100%', padding: 16, borderRadius: 12, alignItems: 'center' },
+  musicModalBtnTxt: { fontSize: 13, fontWeight: '800', letterSpacing: 2 },
+  musicModalSkip:   { fontSize: 12, color: 'rgba(255,255,255,0.3)', letterSpacing: 1 },
 
   content: {
     flex: 1,

@@ -135,7 +135,10 @@ export default {
   },
   intro: {
     generatingImage: 'generating image…',
-    enableMusic: 'Play music',
+    enableMusic: 'MUSIC',
+    enableMusicSub: 'This invitation has a soundtrack. Would you like to enable it?',
+    enableMusicConfirm: '▸ ENABLE MUSIC',
+    enableMusicSkip: 'no, thanks',
   },
   ticket: {
     tapHint: 'tap to see details  ↩',
